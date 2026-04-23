@@ -67,8 +67,10 @@ export type LeadershipWindow = {
   breadth: number;
   turnoverChange: number;
   leaderConcentration: number;
+  topFiveContribution: number;
   heat: number;
   participationLabel: string;
+  rallyType: "leader-driven" | "broad-participation" | "mixed";
 };
 
 export type EvidenceItem = {
@@ -101,6 +103,14 @@ export type ThemeSnapshot = {
   };
   topLeaders: SecurityRecord[];
   constituents: SecurityRecord[];
+  diagnostics: {
+    narrativeType: "policy-driven" | "sentiment-driven" | "earnings-driven" | "mixed";
+    stabilityStyle: "defensive" | "cyclical" | "balanced";
+    dividendProxy: number;
+    stabilityScore: number;
+    growthScore: number;
+    characteristicLabel: string;
+  };
   fundamentalSnapshot: {
     averageQualityScore: number;
     averageMomentumScore: number;

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, ArrowUpRight, Database, ShieldAlert } from "lucide-react";
+import { Activity, Database, ShieldAlert } from "lucide-react";
 import { MetricCard } from "@/components/metric-card";
 import { RefreshButton } from "@/components/refresh-button";
 import { SummaryCard } from "@/components/summary-card";
@@ -8,6 +8,12 @@ import { getDictionary } from "@/lib/i18n";
 import { getLocale } from "@/lib/locale";
 import { formatRatioPercent, formatScore } from "@/lib/format";
 import { getResearchWorkspace } from "@/lib/research/workspace";
+
+function rallyTypeLabel(rallyType: "leader-driven" | "broad-participation" | "mixed") {
+  if (rallyType === "leader-driven") return "龙头驱动";
+  if (rallyType === "broad-participation") return "广泛参与";
+  return "分化轮动";
+}
 
 export default async function HomePage() {
   const locale = await getLocale();
@@ -41,8 +47,16 @@ export default async function HomePage() {
             <MetricCard label={t.marketLeadership.today} value={leadTheme?.name ?? "-"} detail={leadTheme ? formatScore(leadTheme.leadership.today.heat) : undefined} tone="positive" />
             <MetricCard label={t.marketLeadership.fiveDay} value={fiveDayBoard.themes[0]?.name ?? "-"} detail={fiveDayBoard.themes[0] ? formatScore(fiveDayBoard.themes[0].leadership.fiveDay.heat) : undefined} />
             <MetricCard label={t.marketLeadership.twentyDay} value={twentyDayBoard.themes[0]?.name ?? "-"} detail={twentyDayBoard.themes[0] ? formatScore(twentyDayBoard.themes[0].leadership.twentyDay.heat) : undefined} />
-            <MetricCard label={t.marketLeadership.breadth} value={leadTheme ? formatRatioPercent(leadTheme.leadership.today.breadth) : "-"} detail={leadTheme?.leadership.today.participationLabel} />
-            <MetricCard label={t.marketLeadership.concentration} value={leadTheme ? formatRatioPercent(leadTheme.leadership.today.leaderConcentration) : "-"} detail={workspace.providerStatus.current} />
+            <MetricCard
+              label={t.marketLeadership.breadth}
+              value={leadTheme ? formatRatioPercent(leadTheme.leadership.today.breadth) : "-"}
+              detail={leadTheme ? rallyTypeLabel(leadTheme.leadership.today.rallyType) : undefined}
+            />
+            <MetricCard
+              label={t.marketLeadership.concentration}
+              value={leadTheme ? formatRatioPercent(leadTheme.leadership.today.topFiveContribution) : "-"}
+              detail={leadTheme?.diagnostics.characteristicLabel}
+            />
           </div>
         </div>
 
@@ -87,7 +101,7 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="terminal-table w-full min-w-[1080px] text-left text-sm">
+          <table className="terminal-table w-full min-w-[1180px] text-left text-sm">
             <thead>
               <tr>
                 <th>主题</th>
@@ -97,7 +111,8 @@ export default async function HomePage() {
                 <th>{t.marketLeadership.breadth}</th>
                 <th>{t.marketLeadership.turnover}</th>
                 <th>{t.marketLeadership.concentration}</th>
-                <th>参与方式</th>
+                <th>{t.marketLeadership.rallyType}</th>
+                <th>叙事标签</th>
               </tr>
             </thead>
             <tbody>
@@ -113,8 +128,9 @@ export default async function HomePage() {
                   <td>{formatScore(theme.leadership.twentyDay.heat)}</td>
                   <td>{formatRatioPercent(theme.leadership.today.breadth)}</td>
                   <td>{formatRatioPercent(theme.avgTurnoverDelta)}</td>
-                  <td>{formatRatioPercent(theme.leadership.today.leaderConcentration)}</td>
-                  <td>{theme.leadership.today.participationLabel}</td>
+                  <td>{formatRatioPercent(theme.leadership.today.topFiveContribution)}</td>
+                  <td>{rallyTypeLabel(theme.leadership.today.rallyType)}</td>
+                  <td>{theme.summary.marketNarrative.split("，")[0]}</td>
                 </tr>
               ))}
             </tbody>

@@ -6,10 +6,10 @@ export const localeCookieName = "signaldeck-locale";
 const dictionaries = {
   en: {
     nav: {
-      market: "Market",
-      themes: "Themes",
+      market: "Market Leadership",
+      themes: "Theme Research",
       fundamentals: "Fundamentals",
-      funds: "Funds",
+      funds: "Fund Diagnostics",
       subtitle: "A-share research workspace"
     },
     footer: {
@@ -35,26 +35,25 @@ const dictionaries = {
       aiSynthesis: "AI synthesis"
     },
     marketLeadership: {
-      eyebrow: "Structured market rotation",
+      eyebrow: "Structured rotation tracking",
       title: "Market Leadership",
-      description:
-        "Track A-share themes across today, 5 days, and 20 days with heat, breadth, turnover change, and leader concentration kept separate.",
+      description: "Track A-share themes across today, 5D, and 20D with heat, breadth, turnover, and concentration split apart.",
       heat: "Heat",
       breadth: "Breadth",
       turnover: "Turnover change",
-      concentration: "Leader concentration",
+      concentration: "Top 5 contribution",
       today: "Today",
       fiveDay: "5D",
       twentyDay: "20D",
+      rallyType: "Rally type",
       boardTitle: "Theme ranking",
-      boardBody: "Use the three windows together to tell apart fresh rotation from durable leadership."
+      boardBody: "Use participation and concentration together to tell apart broad rallies from leader-only pushes."
     },
     themeResearch: {
       eyebrow: "Curated theme baskets",
       title: "Theme Research",
-      description:
-        "Curated A-share theme pages combine performance, breadth, leaders, and fundamentals snapshots with evidence-based summaries.",
-      configHint: "Theme baskets are editable through config files instead of hardcoded UI lists.",
+      description: "Theme pages combine performance, breadth, leaders, diagnostics, and concise evidence-based summaries.",
+      configHint: "Theme baskets stay editable through config files rather than hardcoded UI lists.",
       curatedBasket: "Curated basket",
       breadth: "Internal breadth",
       turnoverChange: "Turnover change",
@@ -64,19 +63,22 @@ const dictionaries = {
       positiveMembers: (positive: number, total: number) => `${positive}/${total} members positive`,
       configFile: "Config file",
       leaderTrend: "Leader trend",
-      chartBody: "Uses the top leader's recent path as a quick proxy for chase intensity inside the theme.",
+      chartBody: "Uses the lead stock path as a quick proxy for chase intensity inside the basket.",
       latestLeaderPrice: "Leader latest price",
       leaderStocks: "Leader stocks",
       evidencePanel: "Structured evidence",
       constituents: "Current constituents",
       medianRoe: (value: number) => `Median ROE ${(value * 100).toFixed(1)}%`,
-      leaderConcentration: (value: number) => `Leader concentration ${(value * 100).toFixed(0)}%`
+      leaderConcentration: (value: number) => `Top 5 contribution ${(value * 100).toFixed(0)}%`,
+      rallyTypeLabel: (value: string) => `Rally type: ${value}`,
+      dividendProxy: (value: number) => `Dividend proxy ${(value * 100).toFixed(1)}%`,
+      styleProfile: (value: string) => `Style: ${value}`,
+      narrativeTag: (value: string) => `Narrative: ${value}`
     },
     fundamentals: {
       eyebrow: "Transparent scoring",
       title: "Fundamentals Dashboard",
-      description:
-        "Review A-share fundamentals with a transparent scoring system that keeps business quality separate from market momentum.",
+      description: "Review A-share fundamentals with a transparent scoring system that keeps business quality separate from market momentum.",
       transparency: "Transparent and adjustable",
       weightHint: "Weights come from config and can be changed without rewriting the page.",
       methodTitle: "Scoring method",
@@ -96,8 +98,7 @@ const dictionaries = {
     funds: {
       eyebrow: "Exposure diagnostics",
       title: "Fund Diagnostics",
-      description:
-        "Inspect fund-like baskets through sector, theme, and style exposure so research focuses on actual allocation instead of labels alone.",
+      description: "Inspect fund-like baskets through sector, theme, and style exposure so research focuses on actual allocation instead of labels alone.",
       topSector: "Top sector",
       themeOverlap: "Tracked-theme overlap",
       themeExposure: "Theme exposure",
@@ -112,9 +113,9 @@ const dictionaries = {
     },
     summary: {
       marketQuestion: "What is the market trading?",
-      driverQuestion: "Is it sentiment-led or fundamentals-led?",
+      driverQuestion: "What is driving it?",
       evidenceQuestion: "What evidence supports it?",
-      riskQuestion: "What are the risks or counter-evidence?"
+      riskQuestion: "What are the risks?"
     },
     symbol: {
       titleSuffix: "Research Card",
@@ -138,14 +139,14 @@ const dictionaries = {
       themes: "主题研究",
       fundamentals: "基本面看板",
       funds: "基金透视",
-      subtitle: "A 股研究工作台"
+      subtitle: "A股研究工作台"
     },
     footer: {
-      disclaimer: "本产品仅用于研究支持，不用于实盘交易，也不构成投资建议。",
-      roadmap: "当前版本已为可插拔数据源与收盘后刷新流程预留清晰路径。"
+      disclaimer: "仅用于研究支持，不用于实盘交易，也不构成投资建议。",
+      roadmap: "已按可插拔数据源和收盘后刷新流程组织。"
     },
     common: {
-      defaultBadge: "A 股研究支持",
+      defaultBadge: "A股研究支持",
       noSampleData: "暂无样本数据",
       noChartData: "当前没有可展示的图表数据。",
       latestValue: "最新值",
@@ -160,52 +161,57 @@ const dictionaries = {
       marketData: "市场数据",
       financialData: "财务数据",
       themeRules: "主题规则",
-      aiSynthesis: "AI 综合归纳"
+      aiSynthesis: "AI归纳"
     },
     marketLeadership: {
-      eyebrow: "结构化观察市场轮动",
+      eyebrow: "结构化轮动跟踪",
       title: "市场主线",
-      description: "按今日、5 日、20 日三个窗口观察 A 股主题强弱，并把热度、广度、换手变化和龙头集中度拆开看。",
+      description: "按今日、5日、20日三个窗口观察A股主题强弱，把热度、广度、换手和集中度拆开看。",
       heat: "热度",
       breadth: "广度",
       turnover: "换手变化",
-      concentration: "龙头集中度",
+      concentration: "前五贡献",
       today: "今日",
       fiveDay: "5日",
       twentyDay: "20日",
+      rallyType: "行情结构",
       boardTitle: "主题强弱排序",
-      boardBody: "把三个窗口放在一起，才能分辨是短线爆发还是更持续的主线。"
+      boardBody: "把参与广度和集中度放在一起，才能看清是普涨扩散还是龙头独走。"
     },
     themeResearch: {
-      eyebrow: "可编辑主题篮子",
+      eyebrow: "可维护主题篮子",
       title: "主题研究",
-      description: "围绕自定义 A 股主题篮子，展示近期表现、内部广度、龙头股、基本面快照和证据化结论。",
-      configHint: "主题篮子来自配置文件，便于你持续维护自己的研究框架。",
+      description: "围绕自定义A股主题篮子，展示表现、广度、龙头、风格画像和证据化结论。",
+      configHint: "主题篮子来自配置文件，便于持续修订自己的研究边界。",
       curatedBasket: "主题篮子",
       breadth: "内部广度",
       turnoverChange: "换手变化",
       fundamentalQuality: "基本面质量",
       activityClue: "观察增量资金是否跟进",
       marketMomentumScore: (value: number) => `动量 ${value.toFixed(1)}/100`,
-      positiveMembers: (positive: number, total: number) => `${positive}/${total} 只成员上涨`,
+      positiveMembers: (positive: number, total: number) => `${positive}/${total} 只上涨`,
       configFile: "配置文件",
       leaderTrend: "龙头走势",
-      chartBody: "以主题内领先个股的近期走势作为板块情绪与追涨强度的快速参考。",
+      chartBody: "用主题内领先个股的走势，快速观察追价强度和情绪温度。",
       latestLeaderPrice: "龙头最新价",
-      leaderStocks: "龙头股",
+      leaderStocks: "龙头个股",
       evidencePanel: "结构化证据",
       constituents: "当前成分",
-      medianRoe: (value: number) => `中位数 ROE ${(value * 100).toFixed(1)}%`,
-      leaderConcentration: (value: number) => `龙头集中度 ${(value * 100).toFixed(0)}%`
+      medianRoe: (value: number) => `中位ROE ${(value * 100).toFixed(1)}%`,
+      leaderConcentration: (value: number) => `前五贡献 ${(value * 100).toFixed(0)}%`,
+      rallyTypeLabel: (value: string) => `行情结构：${value}`,
+      dividendProxy: (value: number) => `股息代理 ${(value * 100).toFixed(1)}%`,
+      styleProfile: (value: string) => `风格画像：${value}`,
+      narrativeTag: (value: string) => `叙事标签：${value}`
     },
     fundamentals: {
       eyebrow: "透明评分框架",
       title: "基本面看板",
-      description: "把 A 股公司的成长、盈利、杠杆、现金流和分红放在同一个透明评分框架下，同时单独显示市场动量。",
+      description: "把成长、盈利、杠杆、现金流和分红放到同一套透明评分框架下，同时单独展示市场动量。",
       transparency: "透明且可调",
       weightHint: "权重来自配置文件，可按你的研究框架继续调整。",
       methodTitle: "评分方法",
-      methodBody: "质量分使用加权阈值法，动量分单独展示，避免把价格强势误当成基本面强势。",
+      methodBody: "质量分使用加权阈值法，动量分单独展示，避免把价格强势误读成基本面强势。",
       tableTitle: "基本面面板",
       tableBody: "下表用于快速对照研究池内个股的质量分与动量分。",
       stock: "个股",
@@ -221,7 +227,7 @@ const dictionaries = {
     funds: {
       eyebrow: "持仓与暴露诊断",
       title: "基金透视",
-      description: "从行业、主题、风格三层拆解基金或基金式篮子的真实暴露，帮助你理解资金究竟配向哪里。",
+      description: "从行业、主题、风格三层拆解基金或基金式篮子的真实暴露，帮助理解资金究竟配向哪里。",
       topSector: "第一大行业",
       themeOverlap: "跟踪主题重合度",
       themeExposure: "主题暴露",
@@ -236,9 +242,9 @@ const dictionaries = {
     },
     summary: {
       marketQuestion: "市场在炒什么",
-      driverQuestion: "这个方向更像情绪驱动还是基本面驱动",
-      evidenceQuestion: "有哪些支持证据",
-      riskQuestion: "有哪些风险或反证"
+      driverQuestion: "更像什么驱动",
+      evidenceQuestion: "支持证据",
+      riskQuestion: "风险与反证"
     },
     symbol: {
       titleSuffix: "研究卡片",
@@ -248,7 +254,7 @@ const dictionaries = {
       turnoverRate: "换手率",
       marketCap: "市值",
       recentPerformance: "近期表现",
-      recentBody: "本页把个股放回行业、主题与质量/动量框架里看，而不是只看单日涨跌。"
+      recentBody: "本页把个股放回行业、主题和质量/动量框架里看，而不是只看单日涨跌。"
     },
     notFound: {
       title: "未找到相关对象",

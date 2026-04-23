@@ -140,16 +140,16 @@ export default async function SymbolDetailPage({
       <SummaryCard
         locale={locale}
         summary={{
-          marketNarrative: `${stock.name} 当前归属 ${themeNames.join("、")} 等研究主题，更适合放在主题与质量框架中联合观察。`,
-          driverNarrative: stock.momentumScore ?? 0 > (stock.qualityScore ?? 0) ? "当前价格强度高于质量分，更像资金驱动先行。" : "当前质量分不低，走势更容易获得基本面支持。",
+          marketNarrative: `${stock.name} 当前归属于 ${themeNames.join("、")} 等研究主题，更适合放在主题和质量框架里一起看。`,
+          driverNarrative: (stock.momentumScore ?? 0) > (stock.qualityScore ?? 0) ? "短线价格强于质量分，更像资金先行。" : "质量分不低，走势更容易获得基本面支撑。",
           supportingEvidence: [
-            `20 日表现 ${formatRatioPercent(stock.return20d)}，换手率 ${formatRatioPercent(stock.turnoverRate)}。`,
+            `20日表现 ${formatRatioPercent(stock.return20d)}，换手率 ${formatRatioPercent(stock.turnoverRate)}。`,
             `质量分 ${formatScore(stock.qualityScore ?? 0)}，动量分 ${formatScore(stock.momentumScore ?? 0)}。`,
             `营收增长 ${formatRatioPercent(stock.fundamentals.revenueGrowth)}，ROE ${formatRatioPercent(stock.fundamentals.roe)}。`
           ],
           risks: [
-            "单只个股结论需要结合所在主题扩散度一起看。",
-            "财务口径会随真实数据源接入而进一步校验。",
+            "单只个股结论仍需结合所属主题的扩散和强度一起看。",
+            "财务口径会随真实数据源接入继续校验和修正。",
             "仅用于研究支持，不构成投资建议。"
           ],
           sources: ["marketData", "financialData", "themeRules", "aiSynthesis"]

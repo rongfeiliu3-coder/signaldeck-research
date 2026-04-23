@@ -7,6 +7,25 @@ import { getLocale } from "@/lib/locale";
 import { getResearchWorkspace } from "@/lib/research/workspace";
 import { formatRatioPercent, formatScore } from "@/lib/format";
 
+function rallyTypeLabel(rallyType: "leader-driven" | "broad-participation" | "mixed") {
+  if (rallyType === "leader-driven") return "龙头驱动";
+  if (rallyType === "broad-participation") return "广泛参与";
+  return "分化轮动";
+}
+
+function narrativeLabel(narrativeType: "policy-driven" | "sentiment-driven" | "earnings-driven" | "mixed") {
+  if (narrativeType === "policy-driven") return "政策驱动";
+  if (narrativeType === "sentiment-driven") return "情绪驱动";
+  if (narrativeType === "earnings-driven") return "业绩驱动";
+  return "混合驱动";
+}
+
+function styleLabel(stabilityStyle: "defensive" | "cyclical" | "balanced") {
+  if (stabilityStyle === "defensive") return "偏防御";
+  if (stabilityStyle === "cyclical") return "偏周期";
+  return "攻守均衡";
+}
+
 export default async function ThemeDetailPage({
   params
 }: {
@@ -51,7 +70,7 @@ export default async function ThemeDetailPage({
         <div className="surface p-5">
           <p className="text-xs text-slate-500">{t.marketLeadership.today}</p>
           <p className="mt-2 text-3xl font-semibold text-white">{formatScore(theme.leadership.today.heat)}</p>
-          <p className="mt-2 text-sm text-slate-400">{theme.leadership.today.participationLabel}</p>
+          <p className="mt-2 text-sm text-slate-400">{rallyTypeLabel(theme.leadership.today.rallyType)}</p>
         </div>
         <div className="surface p-5">
           <p className="text-xs text-slate-500">{t.themeResearch.breadth}</p>
@@ -59,14 +78,14 @@ export default async function ThemeDetailPage({
           <p className="mt-2 text-sm text-slate-400">{t.themeResearch.positiveMembers(theme.positiveCount, theme.memberCount)}</p>
         </div>
         <div className="surface p-5">
-          <p className="text-xs text-slate-500">{t.themeResearch.fundamentalQuality}</p>
-          <p className="mt-2 text-3xl font-semibold text-white">{formatScore(theme.fundamentalSnapshot.averageQualityScore)}</p>
-          <p className="mt-2 text-sm text-slate-400">{t.themeResearch.medianRoe(theme.fundamentalSnapshot.medianRoe)}</p>
+          <p className="text-xs text-slate-500">{t.marketLeadership.concentration}</p>
+          <p className="mt-2 text-3xl font-semibold text-white">{formatRatioPercent(theme.leadership.today.topFiveContribution)}</p>
+          <p className="mt-2 text-sm text-slate-400">{theme.leadership.today.participationLabel}</p>
         </div>
         <div className="surface p-5">
-          <p className="text-xs text-slate-500">{t.themeResearch.turnoverChange}</p>
-          <p className="mt-2 text-3xl font-semibold text-white">{formatRatioPercent(theme.avgTurnoverDelta)}</p>
-          <p className="mt-2 text-sm text-slate-400">{t.themeResearch.leaderConcentration(theme.leadership.today.leaderConcentration)}</p>
+          <p className="text-xs text-slate-500">{t.themeResearch.fundamentalQuality}</p>
+          <p className="mt-2 text-3xl font-semibold text-white">{formatScore(theme.fundamentalSnapshot.averageQualityScore)}</p>
+          <p className="mt-2 text-sm text-slate-400">{`${styleLabel(theme.diagnostics.stabilityStyle)} | 股息代理 ${(theme.diagnostics.dividendProxy * 100).toFixed(1)}%`}</p>
         </div>
       </section>
 
@@ -125,6 +144,11 @@ export default async function ThemeDetailPage({
               <h2 className="text-base font-semibold text-white">{t.themeResearch.evidencePanel}</h2>
             </div>
             <div className="mt-4 space-y-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-sm font-medium text-white">{t.themeResearch.narrativeTag(narrativeLabel(theme.diagnostics.narrativeType))}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">{t.themeResearch.styleProfile(`${styleLabel(theme.diagnostics.stabilityStyle)} / ${theme.diagnostics.characteristicLabel}`)}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">{t.themeResearch.dividendProxy(theme.diagnostics.dividendProxy)}</p>
+              </div>
               {theme.evidence.map((item) => (
                 <div key={item.label} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                   <p className="text-sm font-medium text-white">{item.label}</p>

@@ -46,6 +46,14 @@ function scoreByThreshold(value: number, weak: number, strong: number, invert = 
   return clamp(normalized * 100);
 }
 
+function formatPercent(value: number, digits = 1) {
+  return `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`;
+}
+
+function toPercentText(value: number, digits = 0) {
+  return `${(value * 100).toFixed(digits)}%`;
+}
+
 function buildFundamentalBreakdown(security: SecurityRecord): FundamentalsBreakdown {
   const thresholds = scoringConfig.thresholds;
   const weights = scoringConfig.weights;
@@ -129,73 +137,234 @@ function buildThemeLeadership(stocks: EnrichedSecurity[], key: "return1d" | "ret
   const positive = stocks.filter((stock) => stock[key] > 0);
   const breadth = positive.length / Math.max(1, stocks.length);
   const turnoverChange = average(stocks.map((stock) => stock.turnoverDelta));
-  const leaderContribution = positive.map((stock) => stock[key] * stock.leaderScore).sort((a, b) => b - a);
-  const totalPositiveContribution = sum(leaderContribution) || 1;
-  const leaderConcentration = sum(leaderContribution.slice(0, 2)) / totalPositiveContribution;
-  const heat = clamp(45 + average(returns) * 900 + breadth * 30 + turnoverChange * 500 - leaderConcentration * 10);
+  const weightedContributors = positive
+    .map((stock) => Math.max(0, stock[key]) * Math.max(stock.leaderScore, 0.1))
+    .sort((a, b) => b - a);
+  const totalPositiveContribution = sum(weightedContributors) || 1;
+  const leaderConcentration = sum(weightedContributors.slice(0, 2)) / totalPositiveContribution;
+  const topFiveContribution = sum(weightedContributors.slice(0, 5)) / totalPositiveContribution;
 
-  let participationLabel = "选择性轮动";
-  if (breadth >= 0.66 && leaderConcentration <= 0.48) participationLabel = "广泛参与";
-  if (breadth <= 0.45 && leaderConcentration >= 0.58) participationLabel = "龙头主导";
+  let rallyType: LeadershipWindow["rallyType"] = "mixed";
+  let participationLabel = "分化轮动";
+
+  if (breadth >= 0.66 && topFiveContribution <= 0.72) {
+    rallyType = "broad-participation";
+    participationLabel = "广泛参与";
+  } else if (breadth <= 0.45 || topFiveContribution >= 0.82 || leaderConcentration >= 0.58) {
+    rallyType = "leader-driven";
+    participationLabel = "龙头驱动";
+  }
+
+  const heat = clamp(45 + average(returns) * 900 + breadth * 28 + turnoverChange * 420 - topFiveContribution * 8);
 
   return {
     avgReturn: average(returns),
     breadth,
     turnoverChange,
     leaderConcentration,
+    topFiveContribution,
     heat: Number(heat.toFixed(1)),
-    participationLabel
+    participationLabel,
+    rallyType
   };
+}
+
+function isPolicyTheme(slug: string) {
+  return ["power-utilities", "satellite-aerospace", "low-carbon-energy"].includes(slug);
+}
+
+function isIncomeTheme(slug: string) {
+  return ["power-utilities", "high-dividend"].includes(slug);
+}
+
+function classifyNarrative(theme: Pick<ThemeSnapshot, "slug" | "leadership" | "fundamentalSnapshot">) {
+  const today = theme.leadership.today;
+  const quality = theme.fundamentalSnapshot.averageQualityScore;
+  const growth = theme.fundamentalSnapshot.medianRevenueGrowth;
+  const roe = theme.fundamentalSnapshot.medianRoe;
+
+  if (quality >= 60 && growth >= 0.1 && roe >= 0.1 && today.breadth >= 0.5) {
+    return "earnings-driven" as const;
+  }
+
+  if (isPolicyTheme(theme.slug) && today.turnoverChange >= -0.005 && today.topFiveContribution <= 0.82) {
+    return "policy-driven" as const;
+  }
+
+  if (today.turnoverChange >= 0.012 || (today.topFiveContribution >= 0.8 && quality < 58)) {
+    return "sentiment-driven" as const;
+  }
+
+  return "mixed" as const;
+}
+
+function buildThemeDiagnostics(theme: Pick<ThemeSnapshot, "slug" | "leadership" | "fundamentalSnapshot" | "avgTurnoverDelta">) {
+  const dividendProxy = theme.fundamentalSnapshot.medianDividendYield;
+  const stabilityScore = clamp(
+    30 +
+      dividendProxy * 1200 +
+      theme.fundamentalSnapshot.averageQualityScore * 0.45 +
+      (1 - Math.max(theme.avgTurnoverDelta, 0)) * 14
+  );
+  const growthScore = clamp(
+    25 +
+      theme.fundamentalSnapshot.medianRevenueGrowth * 160 +
+      theme.fundamentalSnapshot.averageMomentumScore * 0.3 +
+      theme.leadership.twentyDay.avgReturn * 800
+  );
+
+  let stabilityStyle: ThemeSnapshot["diagnostics"]["stabilityStyle"] = "balanced";
+  if (isIncomeTheme(theme.slug) || stabilityScore - growthScore >= 10) stabilityStyle = "defensive";
+  if (theme.slug === "low-carbon-energy" || theme.slug === "compute-ai" || growthScore - stabilityScore >= 10) {
+    stabilityStyle = "cyclical";
+  }
+
+  const narrativeType = classifyNarrative(theme);
+
+  let characteristicLabel = "均衡";
+  if (stabilityStyle === "defensive") {
+    characteristicLabel = dividendProxy >= 0.035 ? "高股息防御" : "稳健防御";
+  } else if (stabilityStyle === "cyclical") {
+    characteristicLabel = theme.fundamentalSnapshot.medianRevenueGrowth >= 0.12 ? "成长弹性" : "景气周期";
+  }
+
+  return {
+    narrativeType,
+    stabilityStyle,
+    dividendProxy: Number(dividendProxy.toFixed(4)),
+    stabilityScore: Number(stabilityScore.toFixed(1)),
+    growthScore: Number(growthScore.toFixed(1)),
+    characteristicLabel
+  };
+}
+
+function narrativeLabel(narrativeType: ThemeSnapshot["diagnostics"]["narrativeType"]) {
+  switch (narrativeType) {
+    case "policy-driven":
+      return "政策驱动";
+    case "sentiment-driven":
+      return "情绪驱动";
+    case "earnings-driven":
+      return "业绩驱动";
+    default:
+      return "混合驱动";
+  }
+}
+
+function stabilityLabel(stabilityStyle: ThemeSnapshot["diagnostics"]["stabilityStyle"]) {
+  switch (stabilityStyle) {
+    case "defensive":
+      return "偏防御";
+    case "cyclical":
+      return "偏周期";
+    default:
+      return "攻守均衡";
+  }
 }
 
 function buildThemeEvidence(theme: ThemeSnapshot): EvidenceItem[] {
   return [
     {
       source: "marketData",
-      label: "价量结构",
-      detail: `今日热度 ${theme.leadership.today.heat.toFixed(1)}，5 日热度 ${theme.leadership.fiveDay.heat.toFixed(1)}，换手变化 ${(theme.avgTurnoverDelta * 100).toFixed(2)}%。`
+      label: "价格与扩散",
+      detail: `今日日内热度 ${theme.leadership.today.heat.toFixed(1)}，广度 ${toPercentText(theme.leadership.today.breadth, 1)}，前五贡献 ${toPercentText(theme.leadership.today.topFiveContribution)}。`
     },
     {
       source: "marketData",
-      label: "内部扩散",
-      detail: `${theme.positiveCount}/${theme.memberCount} 成员上涨，内部广度 ${(theme.internalBreadth * 100).toFixed(1)}%。`
+      label: "资金结构",
+      detail: `${theme.leadership.today.participationLabel}，换手变化 ${formatPercent(theme.avgTurnoverDelta)}，可区分龙头拉升还是普涨扩散。`
     },
     {
       source: "financialData",
-      label: "质量快照",
-      detail: `平均质量分 ${theme.fundamentalSnapshot.averageQualityScore.toFixed(1)}，中位 ROE ${(theme.fundamentalSnapshot.medianRoe * 100).toFixed(1)}%。`
+      label: "基本面快照",
+      detail: `质量均分 ${theme.fundamentalSnapshot.averageQualityScore.toFixed(1)}，中位 ROE ${toPercentText(theme.fundamentalSnapshot.medianRoe, 1)}，股息代理 ${toPercentText(theme.diagnostics.dividendProxy, 1)}。`
     },
     {
       source: "themeRules",
-      label: "篮子规则",
-      detail: `主题来自配置文件维护，当前包含 ${theme.memberCount} 只股票。`
+      label: "主题篮子规则",
+      detail: `当前篮子共 ${theme.memberCount} 只，成分来自配置文件维护，便于持续修订研究边界。`
     }
   ];
 }
 
 function buildThemeSummary(theme: ThemeSnapshot): RationalSummary {
-  const emotionDriven = theme.leadership.today.turnoverChange > 0.01 && theme.leadership.today.leaderConcentration > 0.55;
-  const fundamentalSupportive = theme.fundamentalSnapshot.averageQualityScore >= 60;
+  const today = theme.leadership.today;
+  const narrative = narrativeLabel(theme.diagnostics.narrativeType);
+  const style = `${stabilityLabel(theme.diagnostics.stabilityStyle)}，${theme.diagnostics.characteristicLabel}`;
 
   return {
-    marketNarrative: `${theme.name} 当前更像 ${theme.leadership.today.participationLabel} 的活跃方向，20 日窗口热度 ${theme.leadership.twentyDay.heat >= 60 ? "仍偏强" : "暂属中性"}。`,
-    driverNarrative: emotionDriven
-      ? `短线更偏情绪与题材驱动，原因是换手抬升明显、龙头集中度偏高${fundamentalSupportive ? "，但基本面并非完全缺位。" : "。"}`
-      : fundamentalSupportive
-        ? "更接近基本面和景气共同驱动，说明并非只有少数高弹性个股在拉动。"
-        : "更像价量先行、基本面跟随验证的混合驱动。",
+    marketNarrative: `${theme.name} 当前是 ${narrative} 交易，日内表现偏 ${today.participationLabel}。`,
+    driverNarrative: `${style}。${today.rallyType === "leader-driven" ? "核心股拉动更明显。" : today.rallyType === "broad-participation" ? "板块扩散更完整。" : "扩散和龙头效应并存。"}`
+      + ` 结论以市场数据、财务数据和主题规则为主，AI 仅做归纳。`,
     supportingEvidence: [
-      `5 日平均涨幅 ${(theme.leadership.fiveDay.avgReturn * 100).toFixed(1)}%，今日广度 ${(theme.leadership.today.breadth * 100).toFixed(1)}%。`,
-      `龙头集中度 ${(theme.leadership.today.leaderConcentration * 100).toFixed(0)}%，可区分是扩散还是只拉龙头。`,
-      `平均质量分 ${theme.fundamentalSnapshot.averageQualityScore.toFixed(1)}，中位股息率 ${(theme.fundamentalSnapshot.medianDividendYield * 100).toFixed(1)}%。`
+      `5 日均涨 ${formatPercent(theme.leadership.fiveDay.avgReturn)}，20 日热度 ${theme.leadership.twentyDay.heat.toFixed(1)}。`,
+      `上涨家数 ${theme.positiveCount}/${theme.memberCount}，广度 ${toPercentText(theme.internalBreadth, 1)}，前五贡献 ${toPercentText(today.topFiveContribution)}。`,
+      `质量均分 ${theme.fundamentalSnapshot.averageQualityScore.toFixed(1)}，中位营收增速 ${toPercentText(theme.fundamentalSnapshot.medianRevenueGrowth, 1)}，股息代理 ${toPercentText(theme.diagnostics.dividendProxy, 1)}。`
     ],
     risks: [
-      theme.leadership.today.participationLabel === "龙头主导" ? "上涨集中于少数核心标的，扩散不足时容易回撤。" : "若增量成交减弱，板块热度可能回落。",
-      fundamentalSupportive ? "基本面支持存在，但仍需后续财报持续确认。" : "篮子内公司质量差异较大，主题持续性需继续验证。",
-      "结论仅用于研究支持，不构成投资建议。"
+      today.rallyType === "leader-driven" ? "上涨偏集中，核心股一旦回撤，板块热度容易快速降温。" : "若后续成交跟不上，普涨结构也可能回到分化。",
+      theme.diagnostics.narrativeType === "sentiment-driven"
+        ? "当前更依赖情绪和换手，基本面验证仍待后续财报。"
+        : theme.diagnostics.narrativeType === "policy-driven"
+          ? "政策预期若边际放缓，估值扩张可能先于业绩回落。"
+          : "即便业绩支撑较强，也仍需跟踪订单、利润率和现金流兑现。",
+      "研究结论仅供复盘和跟踪，不构成投资建议。"
     ],
     sources: ["marketData", "financialData", "themeRules", "aiSynthesis"]
   };
+}
+
+function buildThemeSnapshot(basket: RawResearchData["themeBaskets"][number], members: EnrichedSecurity[]): ThemeSnapshot {
+  const todayLeadership = buildThemeLeadership(members, "return1d");
+  const fiveDayLeadership = buildThemeLeadership(members, "return5d");
+  const twentyDayLeadership = buildThemeLeadership(members, "return20d");
+
+  const baseTheme = {
+    slug: basket.slug,
+    name: basket.nameZh,
+    description: basket.descriptionZh,
+    focus: basket.focus,
+    memberCount: members.length,
+    positiveCount: members.filter((security) => security.return1d > 0).length,
+    internalBreadth: members.filter((security) => security.return1d > 0).length / Math.max(1, members.length),
+    avgTurnoverDelta: average(members.map((security) => security.turnoverDelta)),
+    leadership: {
+      today: todayLeadership,
+      fiveDay: fiveDayLeadership,
+      twentyDay: twentyDayLeadership
+    },
+    topLeaders: [...members].sort((a, b) => b.return5d * b.leaderScore - a.return5d * a.leaderScore).slice(0, 3),
+    constituents: members,
+    fundamentalSnapshot: {
+      averageQualityScore: Number(average(members.map((security) => security.qualityScore)).toFixed(1)),
+      averageMomentumScore: Number(average(members.map((security) => security.momentumScore)).toFixed(1)),
+      medianRevenueGrowth: median(members.map((security) => security.fundamentals.revenueGrowth)),
+      medianRoe: median(members.map((security) => security.fundamentals.roe)),
+      medianDividendYield: median(members.map((security) => security.fundamentals.dividendYield))
+    }
+  };
+
+  const diagnostics = buildThemeDiagnostics({
+    ...baseTheme,
+  });
+
+  const theme: ThemeSnapshot = {
+    ...baseTheme,
+    diagnostics,
+    evidence: [],
+    summary: {
+      marketNarrative: "",
+      driverNarrative: "",
+      supportingEvidence: [],
+      risks: [],
+      sources: []
+    }
+  };
+
+  theme.evidence = buildThemeEvidence(theme);
+  theme.summary = buildThemeSummary(theme);
+
+  return theme;
 }
 
 export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
@@ -210,44 +379,9 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
     };
   });
 
-  const themes: ThemeSnapshot[] = raw.themeBaskets.map((basket) => {
+  const themes = raw.themeBaskets.map((basket) => {
     const members = securities.filter((security) => basket.symbols.includes(security.symbol));
-    const theme: ThemeSnapshot = {
-      slug: basket.slug,
-      name: basket.nameZh,
-      description: basket.descriptionZh,
-      focus: basket.focus,
-      memberCount: members.length,
-      positiveCount: members.filter((security) => security.return1d > 0).length,
-      internalBreadth: members.filter((security) => security.return1d > 0).length / Math.max(1, members.length),
-      avgTurnoverDelta: average(members.map((security) => security.turnoverDelta)),
-      leadership: {
-        today: buildThemeLeadership(members, "return1d"),
-        fiveDay: buildThemeLeadership(members, "return5d"),
-        twentyDay: buildThemeLeadership(members, "return20d")
-      },
-      topLeaders: [...members].sort((a, b) => b.return5d * b.leaderScore - a.return5d * a.leaderScore).slice(0, 3),
-      constituents: members,
-      fundamentalSnapshot: {
-        averageQualityScore: Number(average(members.map((security) => security.qualityScore)).toFixed(1)),
-        averageMomentumScore: Number(average(members.map((security) => security.momentumScore)).toFixed(1)),
-        medianRevenueGrowth: median(members.map((security) => security.fundamentals.revenueGrowth)),
-        medianRoe: median(members.map((security) => security.fundamentals.roe)),
-        medianDividendYield: median(members.map((security) => security.fundamentals.dividendYield))
-      },
-      evidence: [],
-      summary: {
-        marketNarrative: "",
-        driverNarrative: "",
-        supportingEvidence: [],
-        risks: [],
-        sources: []
-      }
-    };
-
-    theme.evidence = buildThemeEvidence(theme);
-    theme.summary = buildThemeSummary(theme);
-    return theme;
+    return buildThemeSnapshot(basket, members);
   });
 
   const marketLeadership: MarketLeadershipBoard[] = [
@@ -314,6 +448,15 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
   const strongestThemes = marketLeadership[0].themes.slice(0, 3);
   const overallBreadth = average(themes.map((theme) => theme.leadership.today.breadth));
   const averageQuality = average(themes.map((theme) => theme.fundamentalSnapshot.averageQualityScore));
+  const avgTopFiveContribution = average(themes.map((theme) => theme.leadership.today.topFiveContribution));
+  const narrativeCounts = themes.reduce<Record<string, number>>((accumulator, theme) => {
+    const key = theme.diagnostics.narrativeType;
+    accumulator[key] = (accumulator[key] ?? 0) + 1;
+    return accumulator;
+  }, {});
+  const leadingNarrative =
+    (Object.entries(narrativeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] as ThemeSnapshot["diagnostics"]["narrativeType"] | undefined) ??
+    "mixed";
 
   return {
     asOfDate: raw.asOfDate,
@@ -333,22 +476,22 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
     },
     funds,
     marketSummary: {
-      marketNarrative: `当前最强主题集中在 ${strongestThemes.map((theme) => theme.name).join("、")}。`,
+      marketNarrative: `当前最强主线集中在 ${strongestThemes.map((theme) => theme.name).join("、")}，市场主叙事偏 ${narrativeLabel(leadingNarrative)}。`,
       driverNarrative:
         overallBreadth >= 0.62 && averageQuality >= 58
-          ? "主线更像景气与基本面共同驱动，不是单纯少数龙头拉抬。"
-          : overallBreadth < 0.5
-            ? "更偏结构性情绪轮动，少数龙头和题材热点主导。"
-            : "当前属于价量与基本面交织的混合驱动。",
+          ? "扩散在走强，市场不是只抱少数龙头，结构上更接近景气和业绩共振。"
+          : avgTopFiveContribution >= 0.78
+            ? "主线赚钱效应偏向核心股，短线更要盯龙头分歧和换手衰减。"
+            : "当前属于轮动市，价格、广度和基本面信号并不完全同步。",
       supportingEvidence: [
-        `主题平均广度 ${(overallBreadth * 100).toFixed(1)}%。`,
-        `今日前三强主题为 ${strongestThemes.map((theme) => theme.name).join("、")}。`,
+        `主题平均广度 ${toPercentText(overallBreadth, 1)}，前五贡献均值 ${toPercentText(avgTopFiveContribution)}。`,
+        `今日前三主题为 ${strongestThemes.map((theme) => theme.name).join("、")}。`,
         `主题平均质量分 ${averageQuality.toFixed(1)}，用于区分热度与质量。`
       ],
       risks: [
-        "高热主题若成交无法延续，轮动速度可能加快。",
-        "题材走强并不等于基本面同步改善，仍需结合财报验证。",
-        "结论仅用于研究支持，不构成投资建议。"
+        avgTopFiveContribution >= 0.78 ? "赚钱效应过度集中，龙头一旦松动，板块回撤会更快。" : "若成交继续回落，当前扩散结构仍可能重新收缩。",
+        "政策、情绪和业绩三类驱动会来回切换，单日表现不宜直接外推。",
+        "研究结论仅供复盘和跟踪，不构成投资建议。"
       ],
       sources: ["marketData", "financialData", "themeRules", "aiSynthesis"]
     }

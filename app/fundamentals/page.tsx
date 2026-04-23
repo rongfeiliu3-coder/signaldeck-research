@@ -98,16 +98,16 @@ export default async function FundamentalsPage() {
       <SummaryCard
         locale={locale}
         summary={{
-          marketNarrative: "本页把基本面质量与市场动量拆开展示，避免把短线热度误读成经营质量。",
-          driverNarrative: "当前高分样本中，公用事业与算力两端同时存在，但驱动逻辑并不相同：前者偏现金流与分红，后者偏景气与成长。",
+          marketNarrative: "本页把基本面质量和市场动量拆开看，避免把短线强势误读成经营质量。",
+          driverNarrative: "高分样本里，电力/高股息偏现金流与分红，算力/成长链偏景气和弹性。",
           supportingEvidence: [
-            `质量分榜首为 ${topStocks[0]?.name ?? "-"}，质量分 ${topStocks[0]?.qualityScore?.toFixed(1) ?? "0.0"}。`,
-            "动量分和质量分并列展示，避免只看价格强弱。",
-            "评分权重来自配置文件，可按个人研究习惯调整。"
+            `当前质量分居前的是 ${topStocks[0]?.name ?? "-"}，质量分 ${topStocks[0]?.qualityScore?.toFixed(1) ?? "0.0"}。`,
+            "质量分和动量分并列展示，便于区分基本面改善和价格驱动。",
+            "评分权重来自配置文件，可按研究框架继续调整。"
           ],
           risks: [
-            "财务字段仍可能因数据源差异而存在口径偏差。",
-            "银行等行业的毛利率、负债率解释需要结合行业特性。",
+            "财务字段仍会受数据源口径影响，跨行业比较要留意差异。",
+            "银行、公用事业等行业的负债率和毛利率不能直接横向套用。",
             "仅用于研究支持，不构成投资建议。"
           ],
           sources: ["financialData", "marketData", "themeRules", "aiSynthesis"]

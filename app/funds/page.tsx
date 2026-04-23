@@ -93,16 +93,16 @@ export default async function FundsPage() {
       <SummaryCard
         locale={locale}
         summary={{
-          marketNarrative: "基金透视模块用于回答“资金实际上配到了什么”，而不是只看基金名称或概念标签。",
-          driverNarrative: "如果主题暴露高、质量分低、动量分过热，通常更像进攻型题材配置；若红利与电力权重高且质量稳定，则更偏防御配置。",
+          marketNarrative: "基金透视回答的是资金真正配了什么，而不是名称上写了什么。",
+          driverNarrative: "若主题暴露高、质量分偏低、动量过热，通常更像进攻型配置；若电力和高股息权重高，则更偏防御。",
           supportingEvidence: [
-            `当前示例篮子中，对电力与低碳主题的重合度最高的是 ${workspace.funds[0]?.name ?? "-"}。`,
-            "模块将主题、行业、风格暴露拆开展示，避免单一标签误导。",
-            "未来接入公募披露数据时，只需要替换 fund holdings 数据源。"
+            `当前示例篮子里，对跟踪主题重合度最高的是 ${workspace.funds[0]?.name ?? "-"}`,
+            "模块把主题、行业、风格拆开展示，避免单一标签误导。",
+            "未来接入公募披露时，只需替换 holdings 数据源。"
           ],
           risks: [
-            "当前基金为 mock 篮子，用于验证架构与页面逻辑。",
-            "真实基金持仓存在披露时滞，后续需要注明日期与来源。",
+            "当前基金仍是研究篮子，不是公募真实持仓。",
+            "真实基金持仓存在披露时滞，后续需要补充披露日期和来源。",
             "仅用于研究支持，不构成投资建议。"
           ],
           sources: ["themeRules", "marketData", "aiSynthesis"]

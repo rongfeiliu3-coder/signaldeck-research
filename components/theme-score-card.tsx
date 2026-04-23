@@ -5,6 +5,12 @@ import { Locale, getDictionary } from "@/lib/i18n";
 import { formatPercent, formatRatioPercent, formatScore } from "@/lib/format";
 import { ThemeSnapshot } from "@/lib/types";
 
+function rallyTypeLabel(theme: ThemeSnapshot) {
+  if (theme.leadership.today.rallyType === "leader-driven") return "龙头驱动";
+  if (theme.leadership.today.rallyType === "broad-participation") return "广泛参与";
+  return "分化轮动";
+}
+
 export function ThemeScoreCard({
   theme,
   locale
@@ -32,10 +38,24 @@ export function ThemeScoreCard({
         </Link>
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label={t.marketLeadership.today} value={formatScore(theme.leadership.today.heat)} detail={theme.leadership.today.participationLabel} tone={heatTone} />
-        <MetricCard label={t.themeResearch.breadth} value={formatRatioPercent(theme.internalBreadth)} detail={t.themeResearch.positiveMembers(theme.positiveCount, theme.memberCount)} tone={theme.internalBreadth >= 0.6 ? "positive" : "neutral"} />
-        <MetricCard label={t.themeResearch.turnoverChange} value={formatPercent(theme.avgTurnoverDelta * 100)} detail={t.themeResearch.activityClue} tone={theme.avgTurnoverDelta >= 0 ? "positive" : "negative"} />
-        <MetricCard label={t.themeResearch.fundamentalQuality} value={formatScore(theme.fundamentalSnapshot.averageQualityScore)} detail={t.themeResearch.marketMomentumScore(theme.fundamentalSnapshot.averageMomentumScore)} />
+        <MetricCard label={t.marketLeadership.today} value={formatScore(theme.leadership.today.heat)} detail={rallyTypeLabel(theme)} tone={heatTone} />
+        <MetricCard
+          label={t.themeResearch.breadth}
+          value={formatRatioPercent(theme.internalBreadth)}
+          detail={t.themeResearch.positiveMembers(theme.positiveCount, theme.memberCount)}
+          tone={theme.internalBreadth >= 0.6 ? "positive" : "neutral"}
+        />
+        <MetricCard
+          label={t.marketLeadership.concentration}
+          value={formatRatioPercent(theme.leadership.today.topFiveContribution)}
+          detail={theme.leadership.today.participationLabel}
+          tone={theme.leadership.today.topFiveContribution >= 0.8 ? "negative" : "neutral"}
+        />
+        <MetricCard
+          label={t.themeResearch.fundamentalQuality}
+          value={formatScore(theme.fundamentalSnapshot.averageQualityScore)}
+          detail={`${theme.diagnostics.characteristicLabel} | ${formatPercent(theme.diagnostics.dividendProxy * 100)}`}
+        />
       </div>
     </article>
   );
