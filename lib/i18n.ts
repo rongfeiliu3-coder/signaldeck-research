@@ -1,5 +1,3 @@
-import { StrategyId } from "@/lib/types";
-
 export type Locale = "en" | "zh";
 
 export const defaultLocale: Locale = "zh";
@@ -8,459 +6,258 @@ export const localeCookieName = "signaldeck-locale";
 const dictionaries = {
   en: {
     nav: {
-      dashboard: "Dashboard",
-      backtest: "Backtest",
-      watchlist: "Watchlist",
-      subtitle: "Research signals, locally"
+      market: "Market",
+      themes: "Themes",
+      fundamentals: "Fundamentals",
+      funds: "Funds",
+      subtitle: "A-share research workspace"
     },
     footer: {
-      disclaimer: "SignalDeck is for research and education. It is not a live trading product.",
-      roadmap: "Local-first v1 built for a clean path to Vercel and Supabase later."
+      disclaimer: "Research support only. Not a live trading or investment-advice product.",
+      roadmap: "Built for pluggable data providers and end-of-day refresh."
     },
     common: {
-      defaultBadge: "v1 local prototype",
+      defaultBadge: "A-share research support",
       noSampleData: "No sample data",
-      noChartData: "No chart data available for this view.",
-      latestValue: "Latest value",
-      endingEquity: "Ending equity",
-      rankPrefix: "Rank #",
-      syntheticData: "Synthetic signal, deterministic sample data",
-      daily: "Daily",
-      sampleWindow: "Sample window",
-      recentTrades: "Recent trades",
-      newestFirst: "Newest first",
-      currentModelRead: "Current model read",
-      jumpToAnotherSymbol: "Jump to another symbol",
-      educationalDisclaimer: "Educational disclaimer",
-      viewBacktest: "View backtest",
-      dashboardBack: "Dashboard",
-      openWatchlist: "Open watchlist",
-      openSymbolDetail: "Open symbol detail",
-      compareStrategies: "Compare strategies",
-      confidence: "Confidence",
-      signalEngine: "Signal engine",
-      tradeCount: "Trade count",
-      exposure: "Exposure",
-      researchNotes: "Research notes",
-      strategyPlaybook: "Strategy playbook",
-      setup: "Setup",
-      quality: "Quality",
-      notes: "Notes",
-      bullish: "Bullish",
-      neutral: "Neutral",
-      defensive: "Defensive",
-      strong: "Strong",
-      balanced: "Balanced",
-      cautious: "Cautious"
+      noChartData: "No chart data available.",
+      latestValue: "Latest",
+      manualRefresh: "Refresh",
+      refreshing: "Refreshing...",
+      refreshReady: "Workspace refreshed.",
+      rationalSummary: "Rational Summary",
+      educationalDisclaimer: "Research disclaimer",
+      backToThemes: "Back to themes"
     },
-    actions: {
-      Buy: "Buy",
-      Hold: "Hold",
-      Reduce: "Reduce"
+    evidenceSources: {
+      marketData: "Market data",
+      financialData: "Financial data",
+      themeRules: "Theme rules",
+      aiSynthesis: "AI synthesis"
     },
-    assetClasses: {
-      ETF: "ETF",
-      Equity: "Equity",
-      Crypto: "Crypto"
-    },
-    assetMeta: {
-      SPY: { sector: "US broad market", description: "Large-cap US equity market proxy." },
-      QQQ: { sector: "US growth", description: "Nasdaq 100 technology-heavy equity proxy." },
-      IWM: { sector: "US small caps", description: "Small-cap US equity market proxy." },
-      TLT: { sector: "Rates", description: "Long-duration US Treasury exposure." },
-      GLD: { sector: "Commodities", description: "Gold price exposure through a listed trust." },
-      NVDA: { sector: "Semiconductors", description: "AI infrastructure and accelerated computing leader." },
-      AAPL: { sector: "Consumer technology", description: "Consumer hardware, services, and ecosystem business." },
-      TSLA: { sector: "Electric vehicles", description: "Electric vehicles, energy storage, and autonomy platform." },
-      "BTC-USD": { sector: "Digital assets", description: "Bitcoin quoted in US dollars." },
-      "ETH-USD": { sector: "Digital assets", description: "Ethereum quoted in US dollars." }
-    },
-    strategies: {
-      "dual-ma": {
-        name: "Dual Moving Average Crossover",
-        description: "Long when the fast moving average is above the slow moving average."
-      },
-      "rsi-mean-reversion": {
-        name: "RSI Mean Reversion",
-        description: "Long after oversold RSI conditions, flat after overbought conditions."
-      },
-      "breakout-52w": {
-        name: "52-week Breakout",
-        description: "Long when price breaks above the prior 252-session high."
-      }
-    },
-    rationales: {
-      constructive: "Momentum and relative strength remain constructive in the sample series.",
-      weakened: "Trend quality weakened and recent volatility is elevated in the sample series.",
-      mixed: "Conditions are mixed, so the model stays neutral until confirmation improves."
-    },
-    marketSummary: {
-      trackedAssets: { label: "Tracked assets", detail: "ETFs, equities, crypto" },
-      buySignals: { label: "Buy signals", detail: "Based on mock data" },
-      averageSharpe: { label: "Average Sharpe", detail: "Across top-ranked symbol models" }
-    },
-    dashboard: {
-      eyebrow: "Local-first research prototype",
-      heroTitle: "SignalDeck",
-      heroDescription:
-        "A polished signal dashboard and lightweight backtesting workspace for personal quant research and education.",
-      topOpportunity: "Top opportunity",
-      highestModelScore: "Highest model score today",
-      lastPrice: "Last price",
-      latestSession: "on latest session",
-      signalWorkbench: "Signal workbench",
-      signalWorkbenchBody: "Daily ranking combines live rule state, recent return quality, drawdown discipline, and trade consistency.",
-      researchFlow: "Research flow",
-      flow1: "Scan daily signal cards for ranking, action, and rationale.",
-      flow2: "Open a symbol page to review the sample trend and current model read.",
-      flow3: "Move into backtests to compare rule behavior before adding real data.",
-      watchlistCoverage: "Watchlist coverage",
-      dailySignals: "Daily signals",
-      dailySignalsDescription: "Ranked by synthetic model score across the local sample universe.",
-      dashboardSectionDescription: "Use the cards below to compare conviction, recent behavior, and strategy fit before drilling into detail.",
-      researchScope: "Research scope",
-      researchScopeBody:
-        "Signals and backtests are generated from local sample data. They are intended for learning workflow design, not trading execution.",
-      disclaimerBody:
-        "SignalDeck does not provide financial advice. Backtest results are hypothetical and do not account for slippage, taxes, fees, liquidity, or live market risk."
-    },
-    signalCard: {
-      modelStrategy: "Model strategy",
-      price: "Price",
-      change: "Change",
-      score: "Score",
-      signal: "Signal",
-      horizon: "Horizon",
-      cumulativeReturn: "1Y return",
-      winRate: "Win rate",
-      maxDrawdown: "Max DD",
-      tradeCount: "Trades",
-      reviewSymbol: "Review symbol"
-    },
-    backtest: {
-      eyebrow: "Lightweight backtest",
-      title: "Strategy Backtest",
+    marketLeadership: {
+      eyebrow: "Structured market rotation",
+      title: "Market Leadership",
       description:
-        "Compare simple rule-based strategies against deterministic local sample data. This v1 model is deliberately transparent and easy to replace with real data later.",
-      strategyExplainer:
-        "Each strategy uses the same mock price history, so differences come from the trading rule itself rather than a separate data feed.",
-      selectedInstrument: "Selected instrument",
-      strategy: "Strategy",
-      universe: "Universe",
-      deterministicHistory: "Deterministic local history",
-      listedBelow: "Most recent trades listed below",
-      ruleSummary: "Rule summary",
-      ruleSummaryBody:
-        "All metrics use close-to-close sample returns with simple long-or-flat exposure. This keeps v1 easy to inspect and easy to replace later.",
-      cumulativeReturn: "Cumulative Return",
-      maxDrawdown: "Max Drawdown",
-      sharpeRatio: "Sharpe Ratio",
-      winRate: "Win Rate",
-      averageHoldingPeriod: "Average Holding Period",
-      equityCurveResult: "Equity curve result",
-      worstPeakToTrough: "Worst peak-to-trough",
-      annualizedSample: "Annualized sample",
-      recentTradesShown: "recent trades shown",
-      calendarDays: "Calendar days",
-      equityCurve: " equity curve",
-      equityCurveSummary:
-        "Starting equity: $10,000. Strategy stays fully invested or fully flat based on the selected rule.",
-      entry: "Entry",
-      exit: "Exit",
-      entryPrice: "Entry price",
-      exitPrice: "Exit price",
-      return: "Return",
-      hold: "Hold",
-      noTrades:
-        "No trades were triggered in this sample window. Try another symbol or a different strategy to inspect behavior.",
-      assumptions: "Backtest assumptions",
-      assumptionsBody:
-        "This prototype uses close-to-close returns, all-in or flat exposure, no position sizing, and no transaction costs. Results are hypothetical and educational only.",
-      assumption1: "Signals are generated from deterministic mock histories.",
-      assumption2: "There is no benchmark, exposure model, or portfolio optimizer yet.",
-      assumption3: "v2 and v3 can plug into the same lib interfaces with real data and persistence.",
-      assumption4: "Trade tags and setup notes are heuristic labels to make the mock research flow more believable.",
-      liveState: "Live state",
-      currentlyActive: "Currently active",
-      currentlyFlat: "Currently flat",
-      strategyBehavior: "Strategy behavior",
-      recentExecution: "Recent execution",
-      tradeJournal: "Trade journal",
-      confidencePanel: "Model context"
+        "Track A-share themes across today, 5 days, and 20 days with heat, breadth, turnover change, and leader concentration kept separate.",
+      heat: "Heat",
+      breadth: "Breadth",
+      turnover: "Turnover change",
+      concentration: "Leader concentration",
+      today: "Today",
+      fiveDay: "5D",
+      twentyDay: "20D",
+      boardTitle: "Theme ranking",
+      boardBody: "Use the three windows together to tell apart fresh rotation from durable leadership."
     },
-    watchlist: {
-      eyebrow: "Local sample watchlist",
-      title: "Watchlist",
+    themeResearch: {
+      eyebrow: "Curated theme baskets",
+      title: "Theme Research",
       description:
-        "A curated set of tracked assets for the local SignalDeck prototype. Persistence is intentionally simple in v1.",
-      tracked: "Tracked",
-      trackedDetail: "Assets pinned in mock data",
-      buySignals: "Buy signals",
-      buySignalsDetail: "Current synthetic reads",
-      averageScore: "Average score",
-      averageScoreDetail: "Across watchlist",
-      sectionDescription: "A tighter list for names worth reviewing daily. Signals here should align with the same backtest engine used elsewhere."
+        "Curated A-share theme pages combine performance, breadth, leaders, and fundamentals snapshots with evidence-based summaries.",
+      configHint: "Theme baskets are editable through config files instead of hardcoded UI lists.",
+      curatedBasket: "Curated basket",
+      breadth: "Internal breadth",
+      turnoverChange: "Turnover change",
+      fundamentalQuality: "Fundamental quality",
+      activityClue: "Activity clue",
+      marketMomentumScore: (value: number) => `Momentum ${value.toFixed(1)}/100`,
+      positiveMembers: (positive: number, total: number) => `${positive}/${total} members positive`,
+      configFile: "Config file",
+      leaderTrend: "Leader trend",
+      chartBody: "Uses the top leader's recent path as a quick proxy for chase intensity inside the theme.",
+      latestLeaderPrice: "Leader latest price",
+      leaderStocks: "Leader stocks",
+      evidencePanel: "Structured evidence",
+      constituents: "Current constituents",
+      medianRoe: (value: number) => `Median ROE ${(value * 100).toFixed(1)}%`,
+      leaderConcentration: (value: number) => `Leader concentration ${(value * 100).toFixed(0)}%`
+    },
+    fundamentals: {
+      eyebrow: "Transparent scoring",
+      title: "Fundamentals Dashboard",
+      description:
+        "Review A-share fundamentals with a transparent scoring system that keeps business quality separate from market momentum.",
+      transparency: "Transparent and adjustable",
+      weightHint: "Weights come from config and can be changed without rewriting the page.",
+      methodTitle: "Scoring method",
+      methodBody: "Quality score uses weighted thresholds. Momentum is shown separately so price strength does not masquerade as business quality.",
+      tableTitle: "Fundamental panel",
+      tableBody: "Use the table below to compare quality and momentum across the research universe.",
+      stock: "Stock",
+      qualityScore: "Quality score",
+      momentumScore: "Momentum score",
+      revenueGrowth: "Revenue growth",
+      netProfitGrowth: "Net profit growth",
+      grossMargin: "Gross margin",
+      debtRatio: "Debt ratio",
+      operatingCashFlow: "Operating cash flow",
+      dividendYield: "Dividend yield"
+    },
+    funds: {
+      eyebrow: "Exposure diagnostics",
+      title: "Fund Diagnostics",
+      description:
+        "Inspect fund-like baskets through sector, theme, and style exposure so research focuses on actual allocation instead of labels alone.",
+      topSector: "Top sector",
+      themeOverlap: "Tracked-theme overlap",
+      themeExposure: "Theme exposure",
+      styleExposure: "Style exposure",
+      qualityScore: "Weighted quality",
+      momentumScore: "Weighted momentum",
+      architectureTitle: "Prepared for public fund data",
+      architectureBody: "The page uses mock fund baskets today, but the exposure logic is ready for public fund holdings later.",
+      architecture1: "Replace the holdings input, not the page logic.",
+      architecture2: "Keep disclosure date and source metadata with future live holdings.",
+      architecture3: "Continue separating theme, sector, and style exposure instead of collapsing them into one label."
+    },
+    summary: {
+      marketQuestion: "What is the market trading?",
+      driverQuestion: "Is it sentiment-led or fundamentals-led?",
+      evidenceQuestion: "What evidence supports it?",
+      riskQuestion: "What are the risks or counter-evidence?"
     },
     symbol: {
-      runBacktest: "Run backtest",
-      watchlist: "Watchlist",
-      lastClose: "Last close",
-      sampleReturn: "Sample return",
-      sinceSampleStart: "Since sample start",
-      sampleHigh: "Sample high",
-      sessions320: "320 sessions",
-      sampleLow: "Sample low",
-      samplePriceHistory: "sample price history",
-      signal: "Signal",
-      score: "Score",
-      dailyChange: "Daily change",
-      syntheticConfidence: "Synthetic confidence score",
-      latestSampleDay: "Latest sample day",
-      researchLens: "Research lens",
-      currentSetup: "Current setup",
-      strategyFit: "Strategy fit",
-      recentBehavior: "Recent behavior",
-      strategyContext:
-        "This page combines local price history, top-ranked strategy, and sample performance to support a quick research decision.",
-      historySummary: "Recent trend, volatility, and strategy fit on the same mock dataset."
+      titleSuffix: "Research Card",
+      themeMembership: "Theme membership",
+      qualityScore: "Quality score",
+      momentumScore: "Momentum score",
+      turnoverRate: "Turnover rate",
+      marketCap: "Market cap",
+      recentPerformance: "Recent performance",
+      recentBody: "This page keeps the stock inside its sector, theme, and quality-vs-momentum context."
     },
     notFound: {
-      title: "Symbol not found",
-      body: "That symbol is not available in the local sample universe.",
-      action: "Return to dashboard"
+      title: "Not found",
+      body: "This symbol or theme is not available in the current workspace snapshot.",
+      action: "Return to market page"
     }
   },
   zh: {
     nav: {
-      dashboard: "仪表盘",
-      backtest: "回测",
-      watchlist: "自选列表",
-      subtitle: "本地研究信号平台"
+      market: "市场主线",
+      themes: "主题研究",
+      fundamentals: "基本面看板",
+      funds: "基金透视",
+      subtitle: "A 股研究工作台"
     },
     footer: {
-      disclaimer: "SignalDeck 仅用于研究与教学，不用于实盘交易。",
-      roadmap: "当前为本地优先 v1，后续可平滑扩展到 Vercel 与 Supabase。"
+      disclaimer: "本产品仅用于研究支持，不用于实盘交易，也不构成投资建议。",
+      roadmap: "当前版本已为可插拔数据源与收盘后刷新流程预留清晰路径。"
     },
     common: {
-      defaultBadge: "v1 本地原型",
+      defaultBadge: "A 股研究支持",
       noSampleData: "暂无样本数据",
-      noChartData: "当前视图暂无图表数据。",
-      latestValue: "最新数值",
-      endingEquity: "期末权益",
-      rankPrefix: "排名 #",
-      syntheticData: "合成信号，基于确定性样本数据",
-      daily: "日频",
-      sampleWindow: "样本区间",
-      recentTrades: "近期交易",
-      newestFirst: "最新优先",
-      currentModelRead: "当前模型判断",
-      jumpToAnotherSymbol: "切换其他标的",
-      educationalDisclaimer: "教学研究用途声明",
-      viewBacktest: "查看回测",
-      dashboardBack: "返回仪表盘",
-      openWatchlist: "打开自选列表",
-      openSymbolDetail: "查看标的详情",
-      compareStrategies: "比较策略",
-      confidence: "置信度",
-      signalEngine: "信号引擎",
-      tradeCount: "交易次数",
-      exposure: "持仓覆盖",
-      researchNotes: "研究备注",
-      strategyPlaybook: "策略说明",
-      setup: "形态",
-      quality: "质量",
-      notes: "备注",
-      bullish: "偏多",
-      neutral: "中性",
-      defensive: "防守",
-      strong: "强",
-      balanced: "均衡",
-      cautious: "谨慎"
+      noChartData: "当前没有可展示的图表数据。",
+      latestValue: "最新值",
+      manualRefresh: "手动刷新",
+      refreshing: "刷新中...",
+      refreshReady: "研究工作台已刷新。",
+      rationalSummary: "研究结论",
+      educationalDisclaimer: "研究用途声明",
+      backToThemes: "返回主题研究"
     },
-    actions: {
-      Buy: "买入",
-      Hold: "观望",
-      Reduce: "减仓"
+    evidenceSources: {
+      marketData: "市场数据",
+      financialData: "财务数据",
+      themeRules: "主题规则",
+      aiSynthesis: "AI 综合归纳"
     },
-    assetClasses: {
-      ETF: "ETF",
-      Equity: "股票",
-      Crypto: "加密资产"
+    marketLeadership: {
+      eyebrow: "结构化观察市场轮动",
+      title: "市场主线",
+      description: "按今日、5 日、20 日三个窗口观察 A 股主题强弱，并把热度、广度、换手变化和龙头集中度拆开看。",
+      heat: "热度",
+      breadth: "广度",
+      turnover: "换手变化",
+      concentration: "龙头集中度",
+      today: "今日",
+      fiveDay: "5日",
+      twentyDay: "20日",
+      boardTitle: "主题强弱排序",
+      boardBody: "把三个窗口放在一起，才能分辨是短线爆发还是更持续的主线。"
     },
-    assetMeta: {
-      SPY: { sector: "美股大盘", description: "用于代表美国大盘股市场走势的 ETF。" },
-      QQQ: { sector: "美股成长", description: "偏科技成长风格的纳斯达克 100 指数 ETF。" },
-      IWM: { sector: "美股小盘", description: "用于观察美国小盘股表现的 ETF。" },
-      TLT: { sector: "利率", description: "提供美国长期国债价格敞口的 ETF。" },
-      GLD: { sector: "商品", description: "通过上市信托形式跟踪黄金价格表现。" },
-      NVDA: { sector: "半导体", description: "以 AI 基础设施与加速计算为核心的半导体公司。" },
-      AAPL: { sector: "消费科技", description: "覆盖硬件、服务与生态业务的消费科技公司。" },
-      TSLA: { sector: "电动车", description: "涵盖电动车、储能与自动驾驶平台的公司。" },
-      "BTC-USD": { sector: "数字资产", description: "以美元计价的比特币样本序列。" },
-      "ETH-USD": { sector: "数字资产", description: "以美元计价的以太坊样本序列。" }
+    themeResearch: {
+      eyebrow: "可编辑主题篮子",
+      title: "主题研究",
+      description: "围绕自定义 A 股主题篮子，展示近期表现、内部广度、龙头股、基本面快照和证据化结论。",
+      configHint: "主题篮子来自配置文件，便于你持续维护自己的研究框架。",
+      curatedBasket: "主题篮子",
+      breadth: "内部广度",
+      turnoverChange: "换手变化",
+      fundamentalQuality: "基本面质量",
+      activityClue: "观察增量资金是否跟进",
+      marketMomentumScore: (value: number) => `动量 ${value.toFixed(1)}/100`,
+      positiveMembers: (positive: number, total: number) => `${positive}/${total} 只成员上涨`,
+      configFile: "配置文件",
+      leaderTrend: "龙头走势",
+      chartBody: "以主题内领先个股的近期走势作为板块情绪与追涨强度的快速参考。",
+      latestLeaderPrice: "龙头最新价",
+      leaderStocks: "龙头股",
+      evidencePanel: "结构化证据",
+      constituents: "当前成分",
+      medianRoe: (value: number) => `中位数 ROE ${(value * 100).toFixed(1)}%`,
+      leaderConcentration: (value: number) => `龙头集中度 ${(value * 100).toFixed(0)}%`
     },
-    strategies: {
-      "dual-ma": {
-        name: "双均线交叉",
-        description: "当短期均线位于长期均线上方时持有。"
-      },
-      "rsi-mean-reversion": {
-        name: "RSI 均值回归",
-        description: "RSI 进入超卖后开仓，进入超买后离场。"
-      },
-      "breakout-52w": {
-        name: "52 周突破",
-        description: "价格突破过去 252 个交易日高点时持有。"
-      }
+    fundamentals: {
+      eyebrow: "透明评分框架",
+      title: "基本面看板",
+      description: "把 A 股公司的成长、盈利、杠杆、现金流和分红放在同一个透明评分框架下，同时单独显示市场动量。",
+      transparency: "透明且可调",
+      weightHint: "权重来自配置文件，可按你的研究框架继续调整。",
+      methodTitle: "评分方法",
+      methodBody: "质量分使用加权阈值法，动量分单独展示，避免把价格强势误当成基本面强势。",
+      tableTitle: "基本面面板",
+      tableBody: "下表用于快速对照研究池内个股的质量分与动量分。",
+      stock: "个股",
+      qualityScore: "质量分",
+      momentumScore: "动量分",
+      revenueGrowth: "营收增长",
+      netProfitGrowth: "净利润增长",
+      grossMargin: "毛利率",
+      debtRatio: "负债率",
+      operatingCashFlow: "经营现金流",
+      dividendYield: "股息率"
     },
-    rationales: {
-      constructive: "样本序列中的动量与相对强弱仍然偏强。",
-      weakened: "样本序列的趋势质量走弱，近期波动有所抬升。",
-      mixed: "当前条件偏中性，等待进一步确认信号。"
+    funds: {
+      eyebrow: "持仓与暴露诊断",
+      title: "基金透视",
+      description: "从行业、主题、风格三层拆解基金或基金式篮子的真实暴露，帮助你理解资金究竟配向哪里。",
+      topSector: "第一大行业",
+      themeOverlap: "跟踪主题重合度",
+      themeExposure: "主题暴露",
+      styleExposure: "风格暴露",
+      qualityScore: "加权质量分",
+      momentumScore: "加权动量分",
+      architectureTitle: "为公募数据接入预留架构",
+      architectureBody: "当前页面使用 mock 基金篮子验证透视逻辑，未来只需替换持仓输入层即可接入公开基金数据。",
+      architecture1: "替换的是 holdings 输入，不是页面逻辑。",
+      architecture2: "未来接入真实基金时，应保留披露日期与来源字段。",
+      architecture3: "继续把主题、行业、风格分开展示，而不是压缩成单一标签。"
     },
-    marketSummary: {
-      trackedAssets: { label: "覆盖资产", detail: "ETF、股票、加密资产" },
-      buySignals: { label: "买入信号", detail: "基于本地样本数据" },
-      averageSharpe: { label: "平均夏普", detail: "按各标的最优策略汇总" }
-    },
-    dashboard: {
-      eyebrow: "本地优先研究原型",
-      heroTitle: "SignalDeck",
-      heroDescription: "一个用于量化研究与教学的信号仪表盘与轻量回测工作台。",
-      topOpportunity: "当前重点机会",
-      highestModelScore: "今日模型评分最高",
-      lastPrice: "最新价格",
-      latestSession: "最新样本日",
-      signalWorkbench: "信号工作台",
-      signalWorkbenchBody: "日度排名综合考虑当前规则状态、近期收益质量、回撤控制与交易稳定性。",
-      researchFlow: "研究流程",
-      flow1: "先浏览每张日度信号卡片，查看排名、动作与理由。",
-      flow2: "进入标的详情页，确认样本趋势与当前模型判断。",
-      flow3: "再切换到回测页，对比规则表现后再考虑接入真实数据。",
-      watchlistCoverage: "自选覆盖",
-      dailySignals: "日度信号",
-      dailySignalsDescription: "按合成模型评分，对本地样本标的进行排序展示。",
-      dashboardSectionDescription: "下面的卡片用于快速比较置信度、近期表现与策略适配，再决定是否深入研究。",
-      researchScope: "研究范围",
-      researchScopeBody: "信号与回测均来自本地样本数据，适合研究流程演示与教学用途。",
-      disclaimerBody: "SignalDeck 不构成投资建议。回测结果为假设结果，不包含滑点、税费、流动性与真实交易风险。"
-    },
-    signalCard: {
-      modelStrategy: "模型策略",
-      price: "价格",
-      change: "涨跌",
-      score: "评分",
-      signal: "信号",
-      horizon: "周期",
-      cumulativeReturn: "一年收益",
-      winRate: "胜率",
-      maxDrawdown: "最大回撤",
-      tradeCount: "交易数",
-      reviewSymbol: "研究标的"
-    },
-    backtest: {
-      eyebrow: "轻量回测",
-      title: "策略回测",
-      description: "基于确定性的本地样本数据，对简单规则策略进行对比。v1 强调透明与易替换，便于后续接入真实数据。",
-      strategyExplainer: "所有策略共享同一套 mock 价格历史，因此差异主要来自交易规则本身，而不是数据源差异。",
-      selectedInstrument: "当前标的",
-      strategy: "策略",
-      universe: "资产类别",
-      deterministicHistory: "确定性本地历史",
-      listedBelow: "下方展示最近交易",
-      ruleSummary: "规则说明",
-      ruleSummaryBody: "所有指标基于收盘到收盘收益，持仓状态仅为满仓或空仓，便于理解与后续替换。",
-      cumulativeReturn: "累计收益",
-      maxDrawdown: "最大回撤",
-      sharpeRatio: "夏普比率",
-      winRate: "胜率",
-      averageHoldingPeriod: "平均持有期",
-      equityCurveResult: "权益曲线结果",
-      worstPeakToTrough: "峰值到谷值最大跌幅",
-      annualizedSample: "样本年化",
-      recentTradesShown: "笔近期交易",
-      calendarDays: "自然日",
-      equityCurve: "权益曲线",
-      equityCurveSummary: "初始资金为 10,000 美元。策略根据所选规则在满仓与空仓之间切换。",
-      entry: "开仓日",
-      exit: "平仓日",
-      entryPrice: "开仓价",
-      exitPrice: "平仓价",
-      return: "收益率",
-      hold: "持有",
-      noTrades: "该样本区间内未触发交易。可切换其他标的或策略继续观察。",
-      assumptions: "回测假设",
-      assumptionsBody: "当前原型采用收盘到收盘收益，不含仓位管理、交易成本与滑点，结果仅供研究与教学参考。",
-      assumption1: "信号来自确定性的本地样本历史。",
-      assumption2: "当前尚未加入基准比较、仓位暴露模型或组合优化。",
-      assumption3: "后续 v2 / v3 可在现有 lib 接口上接入真实数据与持久化。",
-      assumption4: "交易标签与备注为启发式生成，用于让研究流程更接近真实产品。",
-      liveState: "当前状态",
-      currentlyActive: "当前持仓中",
-      currentlyFlat: "当前空仓",
-      strategyBehavior: "策略行为",
-      recentExecution: "近期执行",
-      tradeJournal: "交易记录",
-      confidencePanel: "模型上下文"
-    },
-    watchlist: {
-      eyebrow: "本地样本自选",
-      title: "自选列表",
-      description: "这是 SignalDeck v1 的本地自选标的集合，当前保持轻量，不做复杂持久化。",
-      tracked: "跟踪数量",
-      trackedDetail: "已加入本地自选",
-      buySignals: "买入信号",
-      buySignalsDetail: "当前合成判断",
-      averageScore: "平均评分",
-      averageScoreDetail: "基于当前自选池",
-      sectionDescription: "这是更适合日常盯盘的研究清单，信号与回测共用同一套引擎。"
+    summary: {
+      marketQuestion: "市场在炒什么",
+      driverQuestion: "这个方向更像情绪驱动还是基本面驱动",
+      evidenceQuestion: "有哪些支持证据",
+      riskQuestion: "有哪些风险或反证"
     },
     symbol: {
-      runBacktest: "运行回测",
-      watchlist: "自选",
-      lastClose: "最新收盘",
-      sampleReturn: "样本收益",
-      sinceSampleStart: "自样本起点以来",
-      sampleHigh: "样本高点",
-      sessions320: "320 个交易日",
-      sampleLow: "样本低点",
-      samplePriceHistory: "样本价格走势",
-      signal: "信号",
-      score: "评分",
-      dailyChange: "日度涨跌",
-      syntheticConfidence: "合成置信评分",
-      latestSampleDay: "最新样本日",
-      researchLens: "研究视角",
-      currentSetup: "当前形态",
-      strategyFit: "策略适配",
-      recentBehavior: "近期行为",
-      strategyContext: "本页把本地价格历史、当前最优策略与样本表现放在一起，方便快速完成研究判断。",
-      historySummary: "同一组 mock 数据下的趋势、波动和策略适配情况。"
+      titleSuffix: "研究卡片",
+      themeMembership: "所属主题",
+      qualityScore: "质量分",
+      momentumScore: "动量分",
+      turnoverRate: "换手率",
+      marketCap: "市值",
+      recentPerformance: "近期表现",
+      recentBody: "本页把个股放回行业、主题与质量/动量框架里看，而不是只看单日涨跌。"
     },
     notFound: {
-      title: "未找到该标的",
-      body: "当前本地样本资产池中没有这个标的。",
-      action: "返回仪表盘"
+      title: "未找到相关对象",
+      body: "当前研究快照中没有这个主题或个股。",
+      action: "返回市场主线"
     }
   }
 } as const;
 
 export function getDictionary(locale: Locale) {
   return dictionaries[locale];
-}
-
-export function localizeStrategy(strategyId: StrategyId, locale: Locale) {
-  return dictionaries[locale].strategies[strategyId];
-}
-
-export function localizeAction(action: "Buy" | "Hold" | "Reduce", locale: Locale) {
-  return dictionaries[locale].actions[action];
-}
-
-export function localizeAssetClass(assetClass: "ETF" | "Equity" | "Crypto", locale: Locale) {
-  return dictionaries[locale].assetClasses[assetClass];
-}
-
-export function localizeAssetMeta(symbol: string, locale: Locale) {
-  return dictionaries[locale].assetMeta[symbol as keyof (typeof dictionaries)[typeof locale]["assetMeta"]];
 }

@@ -1,0 +1,20 @@
+{
+  "weights": {
+    "revenueGrowth": 0.18,
+    "netProfitGrowth": 0.22,
+    "roe": 0.18,
+    "grossMargin": 0.12,
+    "debtRatio": 0.12,
+    "operatingCashFlow": 0.1,
+    "dividendYield": 0.08
+  },
+  "thresholds": {
+    "revenueGrowth": { "weak": 0.02, "strong": 0.2 },
+    "netProfitGrowth": { "weak": 0.0, "strong": 0.22 },
+    "roe": { "weak": 0.08, "strong": 0.2 },
+    "grossMargin": { "weak": 0.15, "strong": 0.35 },
+    "debtRatio": { "weak": 0.68, "strong": 0.35 },
+    "operatingCashFlow": { "weak": 500000000, "strong": 6000000000 },
+    "dividendYield": { "weak": 0.01, "strong": 0.05 }
+  }
+}

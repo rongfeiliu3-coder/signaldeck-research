@@ -1,9 +1,11 @@
-import { useId } from "react";
-import { PricePoint } from "@/lib/types";
-import { cn } from "@/lib/utils";
+"use client";
 
-function pathFromData(data: PricePoint[], width: number, height: number, padding = 8) {
-  const values = data.map((point) => point.close);
+import { useId } from "react";
+import { cn } from "@/lib/utils";
+import { LinePoint } from "@/lib/types";
+
+function pathFromData(data: LinePoint[], width: number, height: number, padding = 8) {
+  const values = data.map((point) => point.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const spread = max - min || 1;
@@ -11,7 +13,7 @@ function pathFromData(data: PricePoint[], width: number, height: number, padding
   return data
     .map((point, index) => {
       const x = padding + (index / Math.max(1, data.length - 1)) * (width - padding * 2);
-      const y = height - padding - ((point.close - min) / spread) * (height - padding * 2);
+      const y = height - padding - ((point.value - min) / spread) * (height - padding * 2);
       return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
     })
     .join(" ");
@@ -22,9 +24,9 @@ export function Sparkline({
   height = 96,
   className,
   stroke = "#42E6A4",
-  emptyLabel = "No sample data"
+  emptyLabel = "暂无样本数据"
 }: {
-  data: PricePoint[];
+  data: LinePoint[];
   height?: number;
   className?: string;
   stroke?: string;
@@ -54,7 +56,7 @@ export function Sparkline({
       className={cn("w-full overflow-visible", className)}
       viewBox={`0 0 ${width} ${height}`}
       role="img"
-      aria-label="Price trend chart"
+      aria-label="Trend chart"
       preserveAspectRatio="none"
     >
       <defs>

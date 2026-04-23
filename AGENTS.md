@@ -1,0 +1,45 @@
+# AGENTS
+
+This project is an A-share research workspace for daily study, not a trading terminal.
+
+## Product rules
+
+- Prioritize structured evidence over narrative.
+- Separate price action, breadth, turnover, leader concentration, and fundamentals.
+- Mark whether each conclusion comes from market data, financial data, theme basket rules, or AI-generated synthesis.
+- Do not present uncertain inferences as facts.
+- Avoid direct investment advice and sensational language.
+
+## Subagent-style ownership
+
+### UI / Product
+
+- Owns `app/`, `components/`, and the Chinese-first UX.
+- Keeps the terminal-style visual language disciplined and readable.
+- Preserves information hierarchy: numbers first, labels second, descriptions last.
+
+### Data adapters
+
+- Owns `lib/data/` and provider selection.
+- Adds or upgrades adapters without coupling pages to one vendor.
+- Keeps mock fallback healthy so Vercel previews remain runnable.
+
+### Scoring / Analytics
+
+- Owns `lib/research/analytics.ts`, `config/fundamental-scoring.json`, and theme logic.
+- Keeps scoring transparent, documented, and adjustable.
+- Separates market momentum from business quality.
+
+### Documentation / Deployment
+
+- Owns `README.md`, `TODO.md`, `AGENTS.md`, and `vercel.json`.
+- Keeps deployment and scheduled refresh paths documented.
+- Confirms what is real vs mocked after each major phase.
+
+## Maintenance workflow
+
+1. Update `config/theme-baskets.json` before changing theme pages.
+2. Add or change fields inside adapters first, then wire analytics, then update UI.
+3. When changing scoring, update config and documentation together.
+4. Keep mock data aligned with page expectations so the app never breaks without credentials.
+5. Preserve Chinese default copy and English code structure.

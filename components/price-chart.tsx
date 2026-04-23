@@ -1,15 +1,15 @@
-import { PricePoint } from "@/lib/types";
 import { formatCurrency } from "@/lib/format";
+import { LinePoint } from "@/lib/types";
 
 export function PriceChart({
   data,
   title,
   stroke = "#5EDFFF",
   summary,
-  valueLabel = "Value",
-  emptyLabel = "No chart data available for this view."
+  valueLabel = "最新值",
+  emptyLabel = "当前没有可展示的图表数据。"
 }: {
-  data: PricePoint[];
+  data: LinePoint[];
   title: string;
   stroke?: string;
   summary?: string;
@@ -29,7 +29,7 @@ export function PriceChart({
   const width = 900;
   const height = 300;
   const padding = 40;
-  const values = data.map((point) => point.close);
+  const values = data.map((point) => point.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const first = data[0];
@@ -39,7 +39,7 @@ export function PriceChart({
   const path = data
     .map((point, index) => {
       const x = padding + (index / Math.max(1, data.length - 1)) * (width - padding * 2);
-      return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${yFor(point.close).toFixed(2)}`;
+      return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${yFor(point.value).toFixed(2)}`;
     })
     .join(" ");
   const grid = [0, 0.25, 0.5, 0.75, 1].map((ratio) => {
@@ -62,7 +62,7 @@ export function PriceChart({
         </div>
         <div className="text-right text-sm">
           <div className="text-slate-500">{valueLabel}</div>
-          <div className="font-semibold text-white">{formatCurrency(latest.close)}</div>
+          <div className="font-semibold text-white">{formatCurrency(latest.value)}</div>
         </div>
       </div>
       <svg className="mt-5 w-full" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={title}>

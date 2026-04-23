@@ -1,37 +1,32 @@
-# SignalDeck Roadmap
+# TODO Roadmap
 
-## Phase 2 - Product realism and local-first hardening
+## Phase A: A-share data model and theme architecture
 
-- Add tests for signal composition, backtest metrics, and mock data consistency.
-- Add parameter controls for strategy variants without changing the provider interface.
-- Add a benchmark comparison layer for SPY / BTC-sensitive assets.
-- Improve symbol research notes with rolling regime summaries and recent signal history.
-- Add local-only saved views or backtest presets.
+- [x] Replace the generic asset model with A-share securities, themes, funds, and fundamentals.
+- [x] Create pluggable adapters for `mock`, `akshare`, and `tushare`.
+- [x] Move theme baskets and scoring weights into editable config files.
 
-## Phase 3 - Deploy to Vercel
+## Phase B: sector heat and theme dashboards
 
-- Add Vercel project configuration and environment guidance.
-- Confirm the current mock provider works cleanly in preview and production deployments.
-- Document deployment flow, branch previews, and runtime assumptions.
-- Replace `next lint` with direct ESLint CLI usage before Next.js 16.
+- [x] Build market leadership dashboard with today / 5 day / 20 day views.
+- [x] Build theme list and theme detail pages with breadth, turnover, leaders, and evidence.
+- [ ] Add industry-level drilldown beside theme-level drilldown.
 
-## Phase 4 - Add real market data
+## Phase C: fundamentals scoring and rational summaries
 
-- Introduce a real data adapter behind the existing provider interface.
-- Add a refresh model for historical data and daily signal recomputation.
-- Support benchmark data, OHLCV history, and asset metadata from a real source.
-- Add loading and partial-data states for async providers.
+- [x] Build transparent fundamentals panel and separate quality vs momentum.
+- [x] Add concise rational summary blocks with evidence-source tags.
+- [ ] Add valuation snapshots once stable live fields are available.
 
-## Phase 5 - Add auth and watchlist persistence with Supabase
+## Phase D: fund diagnostics
 
-- Add Supabase Auth for personal research accounts.
-- Persist watchlists, saved symbols, and strategy presets.
-- Add row-level security for user-owned research data.
-- Add lightweight server actions or route handlers only where persistence requires them.
+- [x] Add mock fund basket diagnostics with sector, theme, and style exposures.
+- [x] Compute overlap with tracked themes such as power and low-carbon energy.
+- [ ] Connect public fund holdings and disclosure-date metadata.
 
-## Later improvements
+## Phase E: scheduled refresh and deployment hardening
 
-- Add portfolio-level backtests.
-- Add transaction costs, slippage, and cash drag assumptions.
-- Add exports for research notes and backtest summaries.
-- Add a more polished language switcher and localization coverage for docs.
+- [x] Add manual refresh endpoint and UI trigger.
+- [x] Prepare Vercel cron entry for end-of-day refresh.
+- [ ] Persist refresh snapshots to storage for historical comparisons.
+- [ ] Add provider health checks and stale-data warnings.

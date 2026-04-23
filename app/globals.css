@@ -4,12 +4,12 @@
 
 :root {
   color-scheme: dark;
-  --background: #06080b;
+  --background: #05070a;
   --background-soft: #0b1016;
-  --foreground: #ecf4ef;
-  --muted: #8fa1b3;
-  --panel: rgba(14, 20, 28, 0.86);
-  --panel-strong: rgba(17, 24, 32, 0.94);
+  --foreground: #edf2f7;
+  --muted: #8a95a5;
+  --panel: rgba(10, 14, 20, 0.92);
+  --panel-strong: rgba(12, 17, 24, 0.96);
   --panel-border: rgba(255, 255, 255, 0.08);
 }
 
@@ -31,9 +31,8 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   background:
-    radial-gradient(circle at top left, rgba(94, 223, 255, 0.12), transparent 26rem),
-    radial-gradient(circle at top right, rgba(66, 230, 164, 0.08), transparent 24rem),
-    linear-gradient(180deg, rgba(10, 15, 20, 0.98), rgba(6, 8, 11, 1) 28rem),
+    linear-gradient(180deg, rgba(7, 10, 14, 0.98), rgba(5, 7, 10, 1) 24rem),
+    radial-gradient(circle at top right, rgba(26, 36, 48, 0.28), transparent 28rem),
     var(--background);
   color: var(--foreground);
 }
@@ -44,10 +43,10 @@ body::before {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 80px 80px;
-  mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 55%);
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 65%);
 }
 
 a {
@@ -56,11 +55,11 @@ a {
 }
 
 ::selection {
-  background: rgba(66, 230, 164, 0.3);
+  background: rgba(94, 223, 255, 0.24);
 }
 
 .focus-ring {
-  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint;
+  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan;
 }
 
 @layer base {
@@ -77,55 +76,51 @@ a {
     @apply relative min-h-screen;
   }
 
-  .page-shell {
-    @apply mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
-  }
-
   .surface {
-    @apply rounded-xl border border-white/10 bg-panel/80 shadow-[0_10px_40px_rgba(0,0,0,0.22)];
+    @apply rounded-xl border border-white/10 bg-[rgba(10,14,20,0.92)] shadow-[0_8px_22px_rgba(0,0,0,0.24)];
   }
 
   .surface-strong {
-    @apply rounded-xl border border-white/10 bg-white/[0.045] shadow-[0_16px_48px_rgba(0,0,0,0.26)];
+    @apply rounded-xl border border-white/10 bg-[rgba(12,17,24,0.96)] shadow-[0_10px_28px_rgba(0,0,0,0.28)];
   }
 
   .surface-muted {
-    @apply rounded-xl border border-white/8 bg-white/[0.03];
-  }
-
-  .surface-tint {
-    @apply rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-white/[0.025];
+    @apply rounded-xl border border-white/10 bg-white/[0.02];
   }
 
   .section-heading {
-    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500;
+    @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500;
   }
 
   .page-title {
-    @apply text-4xl font-semibold text-white sm:text-5xl;
+    @apply text-3xl font-semibold text-white sm:text-4xl;
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm;
-  }
-
-  .toolbar-group {
-    @apply flex flex-wrap gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-2;
-  }
-
-  .toolbar-chip {
-    @apply rounded-lg border px-3 py-2 text-sm font-medium transition;
-  }
-
-  .metric-grid {
-    @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-5;
-  }
-
-  .chart-shell {
-    @apply surface p-5;
+    @apply inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.16em];
   }
 
   .empty-state {
     @apply flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 text-center text-sm text-slate-500;
+  }
+
+  .terminal-table thead {
+    @apply bg-white/[0.02] text-[11px] uppercase tracking-[0.14em] text-slate-500;
+  }
+
+  .terminal-table th {
+    @apply px-5 py-3 font-medium;
+  }
+
+  .terminal-table td {
+    @apply px-5 py-3.5 text-slate-200;
+  }
+
+  .terminal-table tbody tr {
+    @apply border-t border-white/5 align-top;
+  }
+
+  .terminal-table tbody tr:hover {
+    @apply bg-white/[0.02];
   }
 }

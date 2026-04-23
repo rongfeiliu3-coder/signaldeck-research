@@ -1,0 +1,47 @@
+[
+  {
+    "slug": "power-utilities",
+    "nameZh": "电力",
+    "nameEn": "Power Utilities",
+    "descriptionZh": "火电、水电、电网与区域能源运营，适合观察高股息与防御主线。",
+    "descriptionEn": "Generation, grids, and regional utilities with defensive and dividend attributes.",
+    "focus": "关注高股息、现金流与政策驱动下的电力主线。",
+    "symbols": ["600900.SH", "600795.SH", "600886.SH", "600011.SH", "601985.SH"]
+  },
+  {
+    "slug": "low-carbon-energy",
+    "nameZh": "低碳新能源",
+    "nameEn": "Low Carbon & New Energy",
+    "descriptionZh": "风电、光伏、储能与新能源运营链条。",
+    "descriptionEn": "Wind, solar, storage, and low-carbon generation chain.",
+    "focus": "观察景气修复、成本改善与产业链扩散。",
+    "symbols": ["300274.SZ", "601012.SH", "002594.SZ", "688223.SH", "600406.SH"]
+  },
+  {
+    "slug": "satellite-aerospace",
+    "nameZh": "卫星 / 航天相关",
+    "nameEn": "Satellite & Aerospace",
+    "descriptionZh": "卫星互联网、军工电子、航天装备与遥感链条。",
+    "descriptionEn": "Satellite internet, aerospace electronics, equipment, and remote-sensing chain.",
+    "focus": "关注政策催化、订单预期与题材活跃度。",
+    "symbols": ["600118.SH", "300455.SZ", "600879.SH", "688297.SH", "000547.SZ"]
+  },
+  {
+    "slug": "high-dividend",
+    "nameZh": "高股息",
+    "nameEn": "High Dividend",
+    "descriptionZh": "偏稳健、高现金流、分红能力较强的 A 股篮子。",
+    "descriptionEn": "Stable cash-flow-rich A-share names with dividend support.",
+    "focus": "用于观察防御风格、红利偏好和资金再平衡。",
+    "symbols": ["600900.SH", "601088.SH", "601398.SH", "601857.SH", "600028.SH"]
+  },
+  {
+    "slug": "compute-ai",
+    "nameZh": "算力 / AI",
+    "nameEn": "Compute / AI",
+    "descriptionZh": "算力基础设施、AI 服务器、光模块与相关软硬件。",
+    "descriptionEn": "Compute infra, AI servers, optics, and related hardware/software.",
+    "focus": "观察景气弹性、资金偏好与龙头集中度。",
+    "symbols": ["300308.SZ", "603019.SH", "000977.SZ", "300394.SZ", "002281.SZ"]
+  }
+]
