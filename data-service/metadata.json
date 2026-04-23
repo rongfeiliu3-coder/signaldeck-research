@@ -1,0 +1,146 @@
+{
+  "600900.SH": {
+    "sector": "Utilities",
+    "industry": "Hydropower",
+    "description": "水电龙头，偏防御与红利风格。",
+    "styleTags": ["high-dividend", "state-owned", "cash-flow"]
+  },
+  "600795.SH": {
+    "sector": "Utilities",
+    "industry": "Thermal Power",
+    "description": "火电修复弹性与红利属性兼具。",
+    "styleTags": ["high-dividend", "state-owned"]
+  },
+  "600886.SH": {
+    "sector": "Utilities",
+    "industry": "Power Generation",
+    "description": "综合电力平台，盈利韧性较强。",
+    "styleTags": ["quality", "cash-flow"]
+  },
+  "600011.SH": {
+    "sector": "Utilities",
+    "industry": "Thermal Power",
+    "description": "火电周期修复观察标的。",
+    "styleTags": ["turnaround", "value"]
+  },
+  "601985.SH": {
+    "sector": "Utilities",
+    "industry": "Nuclear Power",
+    "description": "核电运营核心标的。",
+    "styleTags": ["high-dividend", "policy"]
+  },
+  "300274.SZ": {
+    "sector": "New Energy",
+    "industry": "Energy Storage",
+    "description": "储能与逆变器链条龙头。",
+    "styleTags": ["growth", "equipment"]
+  },
+  "601012.SH": {
+    "sector": "New Energy",
+    "industry": "Solar",
+    "description": "光伏龙头，偏景气修复观察。",
+    "styleTags": ["cyclical", "value"]
+  },
+  "002594.SZ": {
+    "sector": "New Energy",
+    "industry": "EV & Battery",
+    "description": "新能源整车与电池龙头。",
+    "styleTags": ["growth", "quality"]
+  },
+  "688223.SH": {
+    "sector": "New Energy",
+    "industry": "Solar Components",
+    "description": "光伏组件弹性标的。",
+    "styleTags": ["beta", "cyclical"]
+  },
+  "600406.SH": {
+    "sector": "Electrical Equipment",
+    "industry": "Grid Equipment",
+    "description": "电网自动化龙头。",
+    "styleTags": ["quality", "policy"]
+  },
+  "600118.SH": {
+    "sector": "Aerospace",
+    "industry": "Satellite Manufacturing",
+    "description": "卫星制造链代表标的。",
+    "styleTags": ["policy", "theme"]
+  },
+  "300455.SZ": {
+    "sector": "Aerospace",
+    "industry": "Aerospace Electronics",
+    "description": "军工电子与卫星链弹性品种。",
+    "styleTags": ["theme", "small-cap"]
+  },
+  "600879.SH": {
+    "sector": "Aerospace",
+    "industry": "Defense Electronics",
+    "description": "军工电子中军。",
+    "styleTags": ["policy", "mid-cap"]
+  },
+  "688297.SH": {
+    "sector": "Aerospace",
+    "industry": "Unmanned Aerial",
+    "description": "无人机及装备平台。",
+    "styleTags": ["theme", "growth"]
+  },
+  "000547.SZ": {
+    "sector": "Aerospace",
+    "industry": "Aerospace Systems",
+    "description": "航天信息化与系统平台。",
+    "styleTags": ["theme", "turnaround"]
+  },
+  "601088.SH": {
+    "sector": "Resources",
+    "industry": "Coal",
+    "description": "高分红资源央企代表。",
+    "styleTags": ["high-dividend", "cash-flow"]
+  },
+  "601398.SH": {
+    "sector": "Financials",
+    "industry": "Bank",
+    "description": "大行红利风格代表。",
+    "styleTags": ["high-dividend", "financial"]
+  },
+  "601857.SH": {
+    "sector": "Resources",
+    "industry": "Energy",
+    "description": "资源央企，高股息观察标的。",
+    "styleTags": ["high-dividend", "resources"]
+  },
+  "600028.SH": {
+    "sector": "Resources",
+    "industry": "Energy",
+    "description": "资源央企与红利风格观察标的。",
+    "styleTags": ["high-dividend", "value"]
+  },
+  "300308.SZ": {
+    "sector": "Technology",
+    "industry": "Optical Modules",
+    "description": "AI 光模块龙头。",
+    "styleTags": ["growth", "ai"]
+  },
+  "603019.SH": {
+    "sector": "Technology",
+    "industry": "Servers",
+    "description": "国产算力平台代表。",
+    "styleTags": ["ai", "infrastructure"]
+  },
+  "000977.SZ": {
+    "sector": "Technology",
+    "industry": "Servers",
+    "description": "服务器龙头，算力中军。",
+    "styleTags": ["ai", "beta"]
+  },
+  "300394.SZ": {
+    "sector": "Technology",
+    "industry": "Optical Components",
+    "description": "光器件细分龙头。",
+    "styleTags": ["ai", "quality"]
+  },
+  "002281.SZ": {
+    "sector": "Technology",
+    "industry": "Optical Modules",
+    "description": "光模块景气链中坚力量。",
+    "styleTags": ["ai", "mid-cap"]
+  }
+}
