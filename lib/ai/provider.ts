@@ -5,15 +5,17 @@ const deepSeekAdapter = new DeepSeekResearchAiAdapter();
 const mockAdapter = new MockResearchAiAdapter();
 
 export function getResearchAiAdapter() {
-  return mockAdapter;
-}
+  const provider = process.env.RESEARCH_AI_PROVIDER?.toLowerCase();
 
-export function getServerApiResearchAiAdapter() {
-  if (deepSeekAdapter.isAvailable()) {
+  if (provider === "deepseek" && deepSeekAdapter.isAvailable()) {
     return deepSeekAdapter;
   }
 
   return mockAdapter;
+}
+
+export function getServerApiResearchAiAdapter() {
+  return getResearchAiAdapter();
 }
 
 export function getResearchAiEnvHints() {

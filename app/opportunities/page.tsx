@@ -174,7 +174,21 @@ export default async function OpportunitiesPage({
               按风险、股息防御、长短线适配、风格和跟踪主题筛选机会。排序只由结构化评分决定，AI 只做机会摘要、反方观点和叙事偏差提示。
             </p>
           </div>
-          <div className="grid gap-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="rounded-xl border border-cyan/20 bg-cyan/[0.06] p-4">
+              <p className="text-xs text-slate-500">Data Status</p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                {workspace.providerStatus.mode === "live" ? "真实数据" : "Mock / 回退"}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">{workspace.providerStatus.current}</p>
+            </div>
+            <div className="rounded-xl border border-amber-300/20 bg-amber-300/[0.06] p-4">
+              <p className="text-xs text-slate-500">AI Status</p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                {workspace.opportunityLab.aiSummary.mode === "live" ? "DeepSeek" : "Mock / 未启用"}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">{workspace.opportunityLab.aiSummary.provider}</p>
+            </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
               <p className="text-xs text-slate-500">当前排序</p>
               <p className="mt-2 text-lg font-semibold text-white">{sortLabel(sort)}</p>

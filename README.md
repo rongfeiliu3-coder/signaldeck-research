@@ -1,10 +1,10 @@
 # Quantize A-share Research Workspace
 
-Quantize is a Chinese A-share research workspace built with Next.js, TypeScript, and Tailwind CSS.
+Quantize is a Chinese-first A-share research workspace for daily study of market rotation, theme strength, fundamentals, fund exposure, and opportunity analysis.
 
-It is designed for rational daily study of market rotation, theme strength, fundamentals, fund exposure, and opportunity analysis. It is not a live trading product and does not provide direct investment advice.
+This is research support only. It does not provide direct investment advice, live trading execution, or sensational stock-picking claims.
 
-## Core modules
+## Core Modules
 
 - 市场主线 / Market Leadership
 - 机会分析 / Opportunity Lab
@@ -12,196 +12,112 @@ It is designed for rational daily study of market rotation, theme strength, fund
 - 基本面看板 / Fundamentals
 - 基金透视 / Fund Diagnostics
 
-## Data architecture
+## Research Rules
 
-The app uses a pluggable provider layer:
+- Separate price action, breadth, turnover, leader concentration, and fundamentals.
+- Keep rankings rule-based and explainable.
+- Mark whether conclusions come from market data, financial data, theme basket rules, or AI synthesis.
+- Use AI only for opportunity summaries, counter arguments, and narrative-bias detection.
+- Never let AI decide rankings or override structured scores.
 
-- `mock`
-- `akshare`
-- `tushare`
+## Environment Variables
 
-Main files:
+The app has two separate provider systems:
 
-- `lib/data/adapters/base.ts`
-- `lib/data/adapters/mock.ts`
-- `lib/data/adapters/akshare.ts`
-- `lib/data/adapters/tushare.ts`
-- `lib/data/provider.ts`
-- `lib/research/analytics.ts`
-- `lib/research/opportunities.ts`
-- `lib/research/workspace.ts`
+- Market data provider: controls whether the workspace uses mock data, Akshare bridge data, or a future Tushare adapter.
+- AI provider: controls whether research summaries use mock AI or DeepSeek.
 
-Editable config:
+These are intentionally separate. Turning on DeepSeek does not make market data live. Turning on Akshare does not require AI.
 
-- `config/theme-baskets.json`
-- `config/fundamental-scoring.json`
+## Local Setup
 
-## Opportunity Lab
-
-Opportunity Lab supports ranking and comparing stocks, themes, sectors, and fund-like baskets.
-
-Opportunity categories:
-
-- 长线观察机会
-- 中线趋势机会
-- 短线交易机会
-- 高风险题材机会
-
-Supported ranking views:
-
-- 综合机会分：高到低
-- 风险等级：高到低
-- 风险等级：低到高
-- 股息/防御属性：高到低
-- 基本面质量：高到低
-- 市场强度：高到低
-- 短线适配度：高到低
-- 长线适配度：高到低
-
-Supported filters:
-
-- asset type: stock, theme, sector, fund basket
-- time horizon: long-term, medium-term, short-term, high-risk
-- risk level: low, medium, high, very-high
-- style: dividend, growth, cyclical, policy, sentiment, quality, AI, energy
-- tracked themes: 电力, 低碳新能源, 卫星航天, 高股息, 算力AI
-
-## Opportunity scoring
-
-The opportunity model keeps sub-scores visible and does not hide everything behind a single black-box score.
-
-Core dimensions:
-
-- market strength
-- breadth / participation
-- turnover / activity
-- leader concentration
-- fundamental quality
-- dividend / defensiveness
-- thematic narrative support
-- institutional relevance
-
-Long-term tracking score prioritizes:
-
-- fundamental quality
-- dividend, cash flow, and defensiveness
-- lower activity / lower speculative heat
-- institutional relevance
-- durable sector or theme support
-
-Short-term trading score prioritizes:
-
-- market strength
-- breadth
-- turnover activity
-- narrative heat
-- leader concentration
-- momentum confirmation
-
-The comparison table shows:
-
-- name
-- type
-- risk level
-- defensive score
-- long-term score
-- short-term score
-- market strength
-- fundamental quality
-- main driver
-- first invalidation condition
-
-## AI architecture
-
-The app includes a provider-agnostic AI layer under `lib/ai/`.
-
-Current adapters:
-
-- `mock`
-- `deepseek` prepared for future use
-
-AI is limited to:
-
-- narrative compression
-- evidence synthesis
-- counterargument generation
-- narrative bias detection
-
-AI does not rank opportunities, override structured scoring, or introduce unsupported claims. Rankings are always produced by `lib/research/opportunities.ts`.
-
-## DeepSeek setup
-
-The app works without DeepSeek. If no key is configured, it falls back to mock AI automatically.
-
-DeepSeek is only read through server-side code. Do not prefix the key with `NEXT_PUBLIC_`, and do not use it in client components.
-
-Local setup:
-
-1. Create `.env.local` from `.env.example`.
-2. Set:
+Create a local-only env file:
 
 ```bash
+cp .env.example .env.local
+```
+
+For the safest local setup, keep mock data and mock AI:
+
+```env
+DATA_PROVIDER=mock
+RESEARCH_AI_PROVIDER=mock
+```
+
+To test DeepSeek locally, put these in `.env.local`:
+
+```env
 RESEARCH_AI_PROVIDER=deepseek
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-chat
 ```
 
-Vercel setup:
+`DEEPSEEK_BASE_URL` and `DEEPSEEK_MODEL` are optional. If missing, the app uses:
 
-1. Open the Vercel project.
-2. Go to `Settings` -> `Environment Variables`.
-3. Add `RESEARCH_AI_PROVIDER` with value `deepseek`.
-4. Add `DEEPSEEK_API_KEY` with your DeepSeek API key.
-5. Optionally add `DEEPSEEK_BASE_URL` with `https://api.deepseek.com`.
-6. Optionally add `DEEPSEEK_MODEL` with `deepseek-chat`.
-7. Apply the variables to Production, Preview, and Development as needed.
-8. Redeploy the project.
+- `DEEPSEEK_BASE_URL=https://api.deepseek.com`
+- `DEEPSEEK_MODEL=deepseek-chat`
 
-Never commit real API keys. `.env.example` contains placeholders only.
+Never commit `.env.local`. Never prefix server secrets with `NEXT_PUBLIC_`.
+
+## Vercel Environment Variables
+
+In Vercel, open:
+
+`Project -> Settings -> Environment Variables`
+
+Required for DeepSeek:
+
+```env
+RESEARCH_AI_PROVIDER=deepseek
+DEEPSEEK_API_KEY=your_real_deepseek_key
+```
+
+Optional because the app has defaults:
+
+```env
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+After changing Vercel environment variables, redeploy the project.
+
+## AI Safety
+
+The DeepSeek key is only read from server-side code via `process.env.DEEPSEEK_API_KEY`.
+
+- The key is never sent to browser components.
+- The key is never returned from `/api/ai/test`.
+- If `RESEARCH_AI_PROVIDER=deepseek` but `DEEPSEEK_API_KEY` is missing, the app falls back to mock AI.
+- AI output is limited to summaries, counter arguments, and narrative-bias detection.
+- Rankings remain controlled by structured scoring in `lib/research/opportunities.ts`.
 
 Test endpoint:
 
-- `GET /api/ai/test`
+```txt
+GET /api/ai/test
+```
 
-The endpoint returns whether DeepSeek is configured, which adapter answered, whether mock fallback was used, and a short test summary. It never returns the API key.
+It reports the active AI adapter, whether fallback was triggered, and the allowed AI scope. It does not expose secrets.
 
-## What is real now
+## Market Data Setup
 
-With the Python bridge running and `DATA_PROVIDER=akshare`, the following are backed by real A-share data:
+Mock data requires no external service:
 
-- tracked A-share stock names and latest prices
-- recent daily history used by charts
-- 1 day / 5 day / 20 day returns
-- turnover rate and simple turnover change
-- basic industry information when available from Akshare
-- market-cap fields when available from Akshare
-- minimal financial indicator fields when available from Akshare
-- theme breadth derived from real constituent moves
+```env
+DATA_PROVIDER=mock
+```
 
-## What is still mocked or simplified
+Akshare bridge mode uses the Python service in `data-service/`:
 
-- only the tracked theme universe is fetched, not the whole market
-- Opportunity Lab sector views are derived from the tracked research universe, not full-market industry breadth
-- fund diagnostics still use generated fund-like baskets, not real public fund holdings
-- current fund codes are placeholder mock codes for diagnostics
-- AI summaries use mock AI unless DeepSeek is configured
-- some fundamentals may be `0` when Akshare does not return a stable field
-- no database, no cache layer, no streaming, no historical snapshot persistence
+```env
+DATA_PROVIDER=akshare
+AKSHARE_API_URL=http://127.0.0.1:8000
+```
 
-## Python data bridge
+The app does not require Akshare to run. If the bridge is unavailable, the provider layer falls back to mock data so Vercel previews stay usable.
 
-The repo includes a simple server-side bridge in `data-service/`.
-
-Endpoints:
-
-- `GET /health`
-- `GET /snapshot/workspace`
-- `GET /snapshot/market-leadership`
-- `GET /snapshot/themes`
-- `GET /snapshot/fundamentals`
-
-Run locally:
+Run the bridge locally:
 
 ```bash
 cd data-service
@@ -211,50 +127,79 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Default local address:
+Bridge endpoints:
 
-- `http://127.0.0.1:8000`
+- `GET /health`
+- `GET /snapshot/workspace`
+- `GET /snapshot/market-leadership`
+- `GET /snapshot/themes`
+- `GET /snapshot/fundamentals`
 
-## Next.js live data setup
+## Visible Status
 
-Mock only:
+Opportunity Lab shows:
 
-- no environment variables required
+- `Data Status`: whether market data is live or mock/fallback.
+- `AI Status`: whether summaries are using DeepSeek or mock/disabled AI.
 
-Akshare:
+This makes it clear whether a research conclusion is powered by live providers or fallback data.
 
-- `DATA_PROVIDER=akshare`
-- `AKSHARE_API_URL=http://127.0.0.1:8000`
-- `AKSHARE_API_KEY=<optional bearer token>`
+## Provider Architecture
 
-Tushare:
+Data adapters:
 
-- `DATA_PROVIDER=tushare`
-- `TUSHARE_API_URL=<your bridge endpoint>`
-- `TUSHARE_TOKEN=<your token>`
+- `lib/data/adapters/mock.ts`
+- `lib/data/adapters/akshare.ts`
+- `lib/data/adapters/tushare.ts`
+- `lib/data/provider.ts`
 
-## Refresh behavior
+AI adapters:
 
-- manual refresh button calls `POST /api/refresh`
-- cron refresh calls `GET /api/cron/refresh`
-- refresh does not persist data yet; it checks bridge availability and the next page render fetches fresh data
+- `lib/ai/adapters/mock.ts`
+- `lib/ai/adapters/deepseek.ts`
+- `lib/ai/provider.ts`
 
-## Roadmap focus
+Research analytics:
 
-- richer live A-share industry and valuation coverage
-- public fund holdings integration
-- live AI provider expansion
-- scheduled end-of-day refresh hardening
-- opportunity journaling and watchlist notes
+- `lib/research/analytics.ts`
+- `lib/research/opportunities.ts`
+- `lib/research/workspace.ts`
+
+Editable config:
+
+- `config/theme-baskets.json`
+- `config/fundamental-scoring.json`
+
+## What Is Real vs Mocked
+
+Real when `DATA_PROVIDER=akshare` and the bridge is running:
+
+- tracked A-share stock names and latest prices
+- recent daily history used by charts
+- 1 day / 5 day / 20 day returns
+- turnover rate and simple turnover change
+- basic industry information when available
+- minimal financial indicator fields when available
+- theme breadth derived from tracked constituents
+
+Still mocked or simplified:
+
+- full-market industry breadth
+- public fund holdings and fund overlap
+- some fundamentals when Akshare fields are missing
+- historical snapshot persistence
+- database, cache layer, and streaming
 
 ## Development
+
+Install and run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Checks:
+Validate:
 
 ```bash
 npm run typecheck
