@@ -175,6 +175,23 @@ For production live Akshare data, set `AKSHARE_API_URL` to a public bridge URL. 
 - Vercel preview/production: keep mock fallback unless you intentionally deploy a public bridge
 - no Supabase or paid server is required for this local-first phase
 
+Render bridge settings:
+
+- Language: Python 3
+- Root Directory: `data-service`
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- FastAPI entry point: `main:app`
+
+Render Free constraints are expected: 512 MB RAM, low CPU, and spin-down after inactivity. The bridge is configured to scan only the theme basket universe, cache snapshots in memory, expose a lightweight `/health`, and let the frontend fall back to mock data if the public bridge is slow or unavailable.
+
+Once Render is deployed, set Vercel to:
+
+```env
+DATA_PROVIDER=akshare
+AKSHARE_API_URL=https://your-render-service.onrender.com
+```
+
 ## Provider Architecture
 
 Data adapters:

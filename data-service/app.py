@@ -22,6 +22,8 @@ REQUEST_SLEEP_MS = int(os.getenv("AKSHARE_SLEEP_MS", "120"))
 HISTORY_DAYS = int(os.getenv("AKSHARE_HISTORY_DAYS", "90"))
 LOOKBACK_BUFFER_DAYS = int(os.getenv("AKSHARE_LOOKBACK_BUFFER_DAYS", "160"))
 CACHE_TTL_SECONDS = int(os.getenv("AKSHARE_CACHE_TTL_SECONDS", "900"))
+MAX_SYMBOLS = int(os.getenv("AKSHARE_MAX_SYMBOLS", "30"))
+SNAPSHOT_TIMEOUT_SECONDS = int(os.getenv("AKSHARE_SNAPSHOT_TIMEOUT_SECONDS", "75"))
 
 _cache_lock = threading.Lock()
 _workspace_cache: Dict[str, Any] = {"payload": None, "generated_at": 0.0}
@@ -108,27 +110,6 @@ def _collect_symbols(theme_baskets: List[Dict[str, Any]]) -> tuple[List[str], Di
   return symbols, theme_map
 
 
-def _fetch_name_map() -> Dict[str, str]:
-  try:
-    spot_df = ak.stock_zh_a_spot_em()
-  except Exception:
-    return {}
-  name_map: Dict[str, str] = {}
-  if spot_df.empty:
-    return name_map
-
-  for _, row in spot_df.iterrows():
-    code = str(row.get("代码", "")).zfill(6)
-    name = str(row.get("名称", "")).strip()
-    if not code or not name:
-      continue
-    if code.startswith("6"):
-      name_map[f"{code}.SH"] = name
-    elif code.startswith(("0", "3")):
-      name_map[f"{code}.SZ"] = name
-  return name_map
-
-
 def _fetch_history(symbol: str) -> pd.DataFrame:
   plain_code = _symbol_to_plain_code(symbol)
   prefixed_code = f"{_symbol_to_exchange(symbol).lower()}{plain_code}"
@@ -202,6 +183,30 @@ def _empty_financials() -> Dict[str, float]:
     "debtRatio": 0.0,
     "operatingCashFlow": 0.0,
     "dividendYield": 0.0
+  }
+
+
+def _empty_security(symbol: str, metadata_map: Dict[str, Dict[str, Any]], theme_map: Dict[str, List[str]]) -> Dict[str, Any]:
+  base_meta = metadata_map.get(symbol, {})
+  return {
+    "symbol": symbol,
+    "name": base_meta.get("name", symbol),
+    "exchange": _symbol_to_exchange(symbol),
+    "industry": base_meta.get("industry", "A-Share"),
+    "sector": base_meta.get("sector", "A-Share"),
+    "styleTags": base_meta.get("styleTags", []),
+    "themeTags": theme_map.get(symbol, []),
+    "description": base_meta.get("description", "A-share research constituent."),
+    "price": 0.0,
+    "marketCapCnyBn": 0.0,
+    "turnoverRate": 0.0,
+    "turnoverDelta": 0.0,
+    "return1d": 0.0,
+    "return5d": 0.0,
+    "return20d": 0.0,
+    "leaderScore": 0.15,
+    "fundamentals": _empty_financials(),
+    "history": []
   }
 
 
@@ -290,14 +295,21 @@ def _default_fund_baskets(theme_baskets: List[Dict[str, Any]]) -> List[Dict[str,
 
 
 def _build_workspace_snapshot_uncached() -> Dict[str, Any]:
+  started_at = time.monotonic()
   theme_baskets = _load_theme_baskets()
   metadata_map = _load_metadata()
-  name_map = _fetch_name_map()
   all_symbols, theme_map = _collect_symbols(theme_baskets)
+  all_symbols = all_symbols[:MAX_SYMBOLS]
   securities: List[Dict[str, Any]] = []
+  timeout_triggered = False
   as_of_date = datetime.now().strftime("%Y-%m-%d")
 
   for symbol in all_symbols:
+    if time.monotonic() - started_at > SNAPSHOT_TIMEOUT_SECONDS:
+      timeout_triggered = True
+      securities.append(_empty_security(symbol, metadata_map, theme_map))
+      continue
+
     history_df = _fetch_history(symbol)
     _sleep_between_calls()
     info_map = _fetch_individual_info(symbol)
@@ -321,7 +333,7 @@ def _build_workspace_snapshot_uncached() -> Dict[str, Any]:
     securities.append(
       {
         "symbol": symbol,
-        "name": name_map.get(symbol, str(_first_existing(info_map, ["股票简称"], symbol))),
+        "name": str(_first_existing(info_map, ["股票简称"], base_meta.get("name", symbol))),
         "exchange": _symbol_to_exchange(symbol),
         "industry": str(_first_existing(info_map, ["行业"], base_meta.get("industry", "A-Share"))),
         "sector": base_meta.get("sector", "A-Share"),
@@ -341,6 +353,7 @@ def _build_workspace_snapshot_uncached() -> Dict[str, Any]:
       }
     )
 
+  data_coverage = round(sum(1 for item in securities if item["price"] > 0) / len(securities), 4) if securities else 0.0
   return {
     "asOfDate": as_of_date,
     "universeName": "A-share configured theme universe",
@@ -352,7 +365,10 @@ def _build_workspace_snapshot_uncached() -> Dict[str, Any]:
       "mode": "live",
       "universe": "configured-theme-baskets",
       "symbolCount": len(all_symbols),
+      "dataCoverage": data_coverage,
       "cacheTtlSeconds": CACHE_TTL_SECONDS,
+      "snapshotTimeoutSeconds": SNAPSHOT_TIMEOUT_SECONDS,
+      "timeoutTriggered": timeout_triggered,
       "generatedAt": datetime.now().isoformat(timespec="seconds")
     }
   }
@@ -382,7 +398,9 @@ def _cache_status() -> Dict[str, Any]:
     "enabled": True,
     "ttlSeconds": CACHE_TTL_SECONDS,
     "hasCachedSnapshot": bool(payload),
-    "ageSeconds": age_seconds
+    "ageSeconds": age_seconds,
+    "symbolLimit": MAX_SYMBOLS,
+    "snapshotTimeoutSeconds": SNAPSHOT_TIMEOUT_SECONDS
   }
 
 
@@ -451,13 +469,15 @@ app = Flask(__name__)
 def health() -> Any:
   theme_baskets = _load_theme_baskets()
   symbols, _ = _collect_symbols(theme_baskets)
+  limited_symbols = symbols[:MAX_SYMBOLS]
   return jsonify(
     {
       "ok": True,
       "service": "akshare-data-bridge",
       "mode": "local-first",
       "universe": "configured-theme-baskets",
-      "symbolCount": len(symbols),
+      "symbolCount": len(limited_symbols),
+      "configuredSymbolCount": len(symbols),
       "cache": _cache_status()
     }
   )
