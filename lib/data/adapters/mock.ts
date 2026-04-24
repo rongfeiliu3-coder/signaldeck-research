@@ -707,6 +707,7 @@ const securities: SecurityRecord[] = [
 const funds: FundBasket[] = [
   {
     slug: "grid-dividend-basket",
+    code: "017001",
     name: "公用事业红利篮子",
     style: "防御收益",
     description: "偏电力、公用事业与高股息权重，用于观察防御资金配置。",
@@ -723,6 +724,7 @@ const funds: FundBasket[] = [
   },
   {
     slug: "new-energy-upgrade",
+    code: "017002",
     name: "低碳升级混合篮子",
     style: "景气成长",
     description: "偏新能源、算力和设备链条，适合观察成长轮动。",
@@ -740,6 +742,7 @@ const funds: FundBasket[] = [
   },
   {
     slug: "satcom-growth-basket",
+    code: "017003",
     name: "卫星算力进攻篮子",
     style: "主题进攻",
     description: "偏卫星航天与算力方向，主题活跃度更高。",

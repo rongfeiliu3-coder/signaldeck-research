@@ -1,6 +1,7 @@
 import { getAdapterStatus, getConfiguredAdapter } from "@/lib/data/provider";
 import { MockAshareAdapter } from "@/lib/data/adapters/mock";
 import { buildWorkspace } from "@/lib/research/analytics";
+import { buildOpportunityLab } from "@/lib/research/opportunities";
 
 type ResearchSourceStatus = {
   activeLabel: string;
@@ -48,6 +49,7 @@ export async function getResearchWorkspace() {
     mode: status.mode,
     available: adapterStatus.available
   };
+  workspace.opportunityLab = await buildOpportunityLab(workspace);
 
   return workspace;
 }

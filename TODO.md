@@ -30,3 +30,27 @@
 - [x] Prepare Vercel cron entry for end-of-day refresh.
 - [ ] Persist refresh snapshots to storage for historical comparisons.
 - [ ] Add provider health checks and stale-data warnings.
+
+## Phase F: Opportunity Lab vertical slice
+
+- [x] Add Opportunity Lab page and navigation entry.
+- [x] Add four opportunity classes: long-term, medium-term, short-term, and high-risk.
+- [x] Add transparent opportunity sub-scores instead of one black-box score.
+- [x] Add stock / fund / theme / sector opportunity cards with evidence and counter-evidence.
+- [x] Add input-driven diagnostics for stock code, fund code, theme name, and sector name.
+- [x] Add AI adapter scaffolding and opportunity-agent workflow steps.
+- [ ] Add real public fund codes and holdings adapters.
+
+## Phase G: live data and AI upgrades
+
+- [ ] Improve Akshare live coverage for industry classification and valuation fields.
+- [ ] Add public fund data adapter with disclosure-date metadata.
+- [ ] Add live AI adapters behind environment variables.
+- [ ] Add provider-specific prompt routing and model selection.
+- [ ] Add stale-data banners when market / financial / fund datasets are out of sync.
+
+## Phase H: journaling and research workflow
+
+- [ ] Add opportunity journaling and watchlist note persistence.
+- [ ] Store thesis changes, invalidation events, and refresh-to-refresh deltas.
+- [ ] Add end-of-day note generation after scheduled refresh.

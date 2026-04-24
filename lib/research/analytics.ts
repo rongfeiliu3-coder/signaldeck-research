@@ -432,6 +432,7 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
 
     return {
       slug: fund.slug,
+      code: fund.code,
       name: fund.name,
       style: fund.style,
       description: fund.description,
@@ -441,7 +442,20 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
       styleExposure,
       trackedThemeOverlap: themeExposure.filter((item) => trackedThemeSlugs.includes(item.slug)),
       averageQualityScore: Number(sum(holdings.map((holding) => holding.security.qualityScore * holding.weight)).toFixed(1)),
-      averageMomentumScore: Number(sum(holdings.map((holding) => holding.security.momentumScore * holding.weight)).toFixed(1))
+      averageMomentumScore: Number(sum(holdings.map((holding) => holding.security.momentumScore * holding.weight)).toFixed(1)),
+      holdings: holdings.map((holding) => ({
+        symbol: holding.security.symbol,
+        name: holding.security.name,
+        weight: holding.weight,
+        sector: holding.security.sector,
+        themeTags: holding.security.themeTags,
+        styleTags: holding.security.styleTags,
+        qualityScore: holding.security.qualityScore ?? 0,
+        momentumScore: holding.security.momentumScore ?? 0,
+        return1d: holding.security.return1d,
+        return5d: holding.security.return5d,
+        return20d: holding.security.return20d
+      }))
     };
   });
 
@@ -475,6 +489,22 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
       stocks: [...securities].sort((a, b) => b.qualityScore - a.qualityScore)
     },
     funds,
+    opportunityLab: {
+      opportunities: [],
+      byCategory: {
+        "long-term": [],
+        "medium-term": [],
+        "short-term": [],
+        "high-risk": []
+      },
+      aiSummary: {
+        provider: "Disabled",
+        mode: "disabled",
+        overview: "",
+        watchlistNote: "",
+        counterArgument: ""
+      }
+    },
     marketSummary: {
       marketNarrative: `当前最强主线集中在 ${strongestThemes.map((theme) => theme.name).join("、")}，市场主叙事偏 ${narrativeLabel(leadingNarrative)}。`,
       driverNarrative:

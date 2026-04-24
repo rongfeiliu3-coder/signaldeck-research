@@ -7,6 +7,7 @@ const dictionaries = {
   en: {
     nav: {
       market: "Market Leadership",
+      opportunities: "Opportunity Lab",
       themes: "Theme Research",
       fundamentals: "Fundamentals",
       funds: "Fund Diagnostics",
@@ -14,7 +15,7 @@ const dictionaries = {
     },
     footer: {
       disclaimer: "Research support only. Not a live trading or investment-advice product.",
-      roadmap: "Built for pluggable data providers and end-of-day refresh."
+      roadmap: "Built for pluggable data providers, AI adapters, and end-of-day refresh."
     },
     common: {
       defaultBadge: "A-share research support",
@@ -136,6 +137,7 @@ const dictionaries = {
   zh: {
     nav: {
       market: "市场主线",
+      opportunities: "机会分析",
       themes: "主题研究",
       fundamentals: "基本面看板",
       funds: "基金透视",
@@ -143,7 +145,7 @@ const dictionaries = {
     },
     footer: {
       disclaimer: "仅用于研究支持，不用于实盘交易，也不构成投资建议。",
-      roadmap: "已按可插拔数据源和收盘后刷新流程组织。"
+      roadmap: "已按可插拔数据源、AI适配层和收盘后刷新流程组织。"
     },
     common: {
       defaultBadge: "A股研究支持",

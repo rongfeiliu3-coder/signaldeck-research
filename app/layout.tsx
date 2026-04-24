@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BarChart3, BookMarked, FolderKanban, PieChart, Sigma } from "lucide-react";
+import { BarChart3, BookMarked, FolderKanban, PieChart, Sigma, Sparkles } from "lucide-react";
 import "./globals.css";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NavLink } from "@/components/nav-link";
@@ -9,7 +9,7 @@ import { getLocale } from "@/lib/locale";
 
 export const metadata: Metadata = {
   title: "Quantize A-share Research Workspace",
-  description: "A-share theme rotation, sector diagnostics, fundamentals, and fund research workspace."
+  description: "A-share theme rotation, sector diagnostics, fundamentals, fund research, and opportunity lab."
 };
 
 export default function RootLayout({
@@ -29,6 +29,7 @@ async function AsyncRootLayout({
   const t = getDictionary(locale);
   const navItems = [
     { href: "/", label: t.nav.market, icon: BarChart3 },
+    { href: "/opportunities", label: t.nav.opportunities, icon: Sparkles },
     { href: "/themes", label: t.nav.themes, icon: FolderKanban },
     { href: "/fundamentals", label: t.nav.fundamentals, icon: Sigma },
     { href: "/funds", label: t.nav.funds, icon: PieChart }

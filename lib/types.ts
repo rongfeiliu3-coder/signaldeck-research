@@ -124,6 +124,7 @@ export type ThemeSnapshot = {
 
 export type FundBasket = {
   slug: string;
+  code?: string;
   name: string;
   style: string;
   description: string;
@@ -133,8 +134,23 @@ export type FundBasket = {
   }>;
 };
 
+export type FundHoldingDiagnostic = {
+  symbol: string;
+  name: string;
+  weight: number;
+  sector: string;
+  themeTags: string[];
+  styleTags: string[];
+  qualityScore: number;
+  momentumScore: number;
+  return1d: number;
+  return5d: number;
+  return20d: number;
+};
+
 export type FundDiagnostic = {
   slug: string;
+  code?: string;
   name: string;
   style: string;
   description: string;
@@ -145,6 +161,77 @@ export type FundDiagnostic = {
   trackedThemeOverlap: Array<{ slug: string; name: string; weight: number }>;
   averageQualityScore: number;
   averageMomentumScore: number;
+  holdings: FundHoldingDiagnostic[];
+};
+
+export type OpportunityAssetType = "stock" | "fund" | "theme" | "sector";
+export type OpportunityCategory = "long-term" | "medium-term" | "short-term" | "high-risk";
+export type OpportunityStyle = "dividend" | "growth" | "cyclical" | "policy" | "sentiment" | "quality";
+export type OpportunityHorizon = "long" | "medium" | "short";
+export type OpportunityConfidence = "high" | "medium" | "low";
+export type OpportunityRisk = "low" | "medium" | "high";
+export type OpportunityDriver = "fundamentals-driven" | "sentiment-driven" | "policy-driven" | "mixed";
+
+export type OpportunityScoreBreakdown = {
+  marketStrength: number;
+  breadthParticipation: number;
+  turnoverActivity: number;
+  leaderConcentration: number;
+  fundamentalQuality: number;
+  defensiveness: number;
+  narrativeSupport: number;
+  institutionalRelevance: number;
+  composite: number;
+};
+
+export type OpportunityItem = {
+  id: string;
+  title: string;
+  assetType: OpportunityAssetType;
+  assetRef: string;
+  category: OpportunityCategory;
+  style: OpportunityStyle[];
+  timeHorizon: OpportunityHorizon;
+  confidence: OpportunityConfidence;
+  riskLevel: OpportunityRisk;
+  driver: OpportunityDriver;
+  scoreBreakdown: OpportunityScoreBreakdown;
+  whyNow: string;
+  supportingEvidence: string[];
+  counterEvidence: string[];
+  thesisInvalidation: string[];
+  bullishCase: string;
+  bearishCase: string;
+};
+
+export type OpportunityDiagnostic = {
+  query: string;
+  matchedType: OpportunityAssetType | "not-found";
+  matchedName: string;
+  matchedRef?: string;
+  sectorExposure: Array<{ name: string; weight: number }>;
+  themeExposure: Array<{ name: string; weight: number }>;
+  styleExposure: Array<{ name: string; weight: number }>;
+  trackedThemeOverlap: Array<{ name: string; weight: number }>;
+  longTermSuitability: string;
+  shortTermSuitability: string;
+  recentStrength: string;
+  majorRisks: string[];
+  relatedOpportunityIds: string[];
+};
+
+export type OpportunityAiSummary = {
+  provider: string;
+  mode: "mock" | "live" | "disabled";
+  overview: string;
+  watchlistNote: string;
+  counterArgument: string;
+};
+
+export type OpportunityLab = {
+  opportunities: OpportunityItem[];
+  byCategory: Record<OpportunityCategory, OpportunityItem[]>;
+  aiSummary: OpportunityAiSummary;
 };
 
 export type MarketLeadershipBoard = {
@@ -179,4 +266,5 @@ export type MarketWorkspace = {
   };
   funds: FundDiagnostic[];
   marketSummary: RationalSummary;
+  opportunityLab: OpportunityLab;
 };
