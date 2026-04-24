@@ -35,6 +35,8 @@ export async function GET() {
     mode: usedAdapter.mode,
     fallbackTriggered,
     deepSeekConfigured: Boolean(process.env.DEEPSEEK_API_KEY),
+    aiScope: ["summarize opportunities", "generate counter arguments", "detect narrative bias"],
+    rankingAuthority: "structured scoring only",
     summary
   });
 }

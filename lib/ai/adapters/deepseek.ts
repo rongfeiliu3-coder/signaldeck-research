@@ -16,26 +16,28 @@ type DeepSeekResponse = {
 function buildPrompt(input: OpportunityAiInput) {
   return [
     `主题: ${input.topic}`,
-    `机会对象: ${input.opportunityTitles.join("、") || "暂无"}`,
+    `结构化排序后的机会对象: ${input.opportunityTitles.join("、") || "暂无"}`,
     `结构化证据: ${input.structuredEvidence.join("；") || "暂无"}`,
     `反证: ${input.counterEvidence.join("；") || "暂无"}`,
-    "请返回 JSON，字段为 overview、watchlistNote、counterArgument。不要给投资建议，不要添加结构化证据之外的新事实。"
+    "请返回 JSON，字段必须为 overview、counterArgument、narrativeBias。",
+    "只允许做机会摘要、反方观点、叙事偏差检测。",
+    "不要给投资建议，不要决定或修改排名，不要添加结构化证据之外的新事实。"
   ].join("\n");
 }
 
 function parseJsonSummary(content: string) {
   try {
-    const parsed = JSON.parse(content) as Partial<{ overview: string; watchlistNote: string; counterArgument: string }>;
+    const parsed = JSON.parse(content) as Partial<{ overview: string; counterArgument: string; narrativeBias: string }>;
     return {
       overview: parsed.overview ?? content,
-      watchlistNote: parsed.watchlistNote ?? "继续跟踪结构化证据变化。",
-      counterArgument: parsed.counterArgument ?? "需要持续检查反证。"
+      counterArgument: parsed.counterArgument ?? "需要持续检查反证。",
+      narrativeBias: parsed.narrativeBias ?? "需要留意强势叙事掩盖反证。"
     };
   } catch {
     return {
       overview: content,
-      watchlistNote: "继续跟踪结构化证据变化。",
-      counterArgument: "需要持续检查反证。"
+      counterArgument: "需要持续检查反证。",
+      narrativeBias: "需要留意强势叙事掩盖反证。"
     };
   }
 }
@@ -60,7 +62,7 @@ export class DeepSeekResearchAiAdapter implements ResearchAiAdapter {
       {
         role: "system",
         content:
-          "你是A股研究工作台里的研究摘要助手。只做证据压缩、反方观点和观察笔记，不提供直接投资建议，不编造未给出的事实。"
+          "你是A股研究工作台里的研究摘要助手。你只做机会摘要、反方观点和叙事偏差检测。排名、分类和评分完全由结构化规则决定，你不能修改、重排或建议替代排名。"
       },
       {
         role: "user",

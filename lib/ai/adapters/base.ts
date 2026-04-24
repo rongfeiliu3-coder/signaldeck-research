@@ -14,7 +14,7 @@ export interface ResearchAiAdapter {
   isAvailable(): boolean;
   summarizeOpportunityLab(input: OpportunityAiInput): Promise<{
     overview: string;
-    watchlistNote: string;
     counterArgument: string;
+    narrativeBias: string;
   }>;
 }

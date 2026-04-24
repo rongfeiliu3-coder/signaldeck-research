@@ -7,10 +7,10 @@ function collectStructuredMarketData(opportunities: OpportunityItem[]) {
 }
 
 function collectFundamentalAndExposureData(opportunities: OpportunityItem[]) {
-  return opportunities.slice(0, 4).map((item) => `${item.title}：质量 ${item.scoreBreakdown.fundamentalQuality.toFixed(0)}，防御/估值 ${item.scoreBreakdown.defensiveness.toFixed(0)}，机构相关度 ${item.scoreBreakdown.institutionalRelevance.toFixed(0)}`);
+  return opportunities.slice(0, 4).map((item) => `${item.title}：质量 ${item.scoreBreakdown.fundamentalQuality.toFixed(0)}，防御属性 ${item.scoreBreakdown.defensiveness.toFixed(0)}，机构相关度 ${item.scoreBreakdown.institutionalRelevance.toFixed(0)}`);
 }
 
-function classifyOpportunityFocus(opportunities: OpportunityItem[]) {
+function collectRankedOpportunityTitles(opportunities: OpportunityItem[]) {
   return opportunities.slice(0, 3).map((item) => item.title);
 }
 
@@ -29,9 +29,9 @@ export async function generateOpportunityLabAiSummary(opportunities: Opportunity
     return {
       provider: adapter.label,
       mode: "disabled",
-      overview: "AI 适配器未启用。",
-      watchlistNote: "先使用结构化机会卡和输入诊断。",
-      counterArgument: "等待后续配置真实模型。"
+      overview: "AI 适配器未启用，当前仅使用结构化评分。",
+      counterArgument: "等待后续配置真实模型后生成反方观点。",
+      narrativeBias: "当前未启用 AI 叙事偏差检测。"
     };
   }
 
@@ -41,12 +41,11 @@ export async function generateOpportunityLabAiSummary(opportunities: Opportunity
     ...buildEvidenceTable(opportunities)
   ];
   const counterEvidence = buildBearishTable(opportunities);
-  const opportunityTitles = classifyOpportunityFocus(opportunities);
   const input = {
     topic: "机会分析",
     structuredEvidence,
     counterEvidence,
-    opportunityTitles
+    opportunityTitles: collectRankedOpportunityTitles(opportunities)
   };
   const fallbackAdapter = new MockResearchAiAdapter();
   let usedAdapter = adapter;
@@ -59,15 +58,15 @@ export async function generateOpportunityLabAiSummary(opportunities: Opportunity
     provider: usedAdapter.label,
     mode: usedAdapter.mode,
     overview: result.overview,
-    watchlistNote: result.watchlistNote,
-    counterArgument: result.counterArgument
+    counterArgument: result.counterArgument,
+    narrativeBias: result.narrativeBias
   };
 }
 
 export const opportunityAgentWorkflow = {
   collectStructuredMarketData,
   collectFundamentalAndExposureData,
-  classifyOpportunityFocus,
+  collectRankedOpportunityTitles,
   buildEvidenceTable,
   buildBearishTable,
   generateOpportunityLabAiSummary

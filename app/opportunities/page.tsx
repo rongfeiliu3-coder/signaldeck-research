@@ -171,7 +171,7 @@ export default async function OpportunitiesPage({
           <div>
             <h1 className="page-title">机会分析</h1>
             <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-300">
-              按风险、股息防御、长短线适配、风格和跟踪主题筛选机会。结构化评分优先，AI 只做摘要压缩。
+              按风险、股息防御、长短线适配、风格和跟踪主题筛选机会。排序只由结构化评分决定，AI 只做机会摘要、反方观点和叙事偏差提示。
             </p>
           </div>
           <div className="grid gap-3">
@@ -402,12 +402,12 @@ export default async function OpportunitiesPage({
                 <p className="mt-2 text-sm leading-6 text-slate-300">{workspace.opportunityLab.aiSummary.overview}</p>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-sm font-medium text-white">观察笔记</p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">{workspace.opportunityLab.aiSummary.watchlistNote}</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                 <p className="text-sm font-medium text-white">反方视角</p>
                 <p className="mt-2 text-sm leading-6 text-slate-300">{workspace.opportunityLab.aiSummary.counterArgument}</p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-sm font-medium text-white">叙事偏差</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">{workspace.opportunityLab.aiSummary.narrativeBias}</p>
               </div>
             </div>
           </section>
@@ -421,7 +421,7 @@ export default async function OpportunitiesPage({
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">1. 收集市场强度、广度、换手、集中度。</div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">2. 收集基本面、基金暴露、跟踪主题重合度。</div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">3. 分类到长线 / 中线 / 短线 / 高风险题材，并生成证据表。</div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">4. 输出多头框架、空头框架、失效条件，最后才交给 AI 做压缩总结。</div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">4. 输出多头框架、空头框架、失效条件；AI 只做摘要、反方观点和叙事偏差提示。</div>
             </div>
           </section>
         </section>

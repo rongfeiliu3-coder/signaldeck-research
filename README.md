@@ -125,9 +125,9 @@ AI is limited to:
 - narrative compression
 - evidence synthesis
 - counterargument generation
-- watchlist note generation
+- narrative bias detection
 
-AI does not override structured scoring and should not introduce unsupported claims.
+AI does not rank opportunities, override structured scoring, or introduce unsupported claims. Rankings are always produced by `lib/research/opportunities.ts`.
 
 ## DeepSeek setup
 

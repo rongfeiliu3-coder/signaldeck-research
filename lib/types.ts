@@ -227,8 +227,8 @@ export type OpportunityAiSummary = {
   provider: string;
   mode: "mock" | "live" | "disabled";
   overview: string;
-  watchlistNote: string;
   counterArgument: string;
+  narrativeBias: string;
 };
 
 export type OpportunityLab = {

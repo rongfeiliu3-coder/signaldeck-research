@@ -501,8 +501,8 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
         provider: "Disabled",
         mode: "disabled",
         overview: "",
-        watchlistNote: "",
-        counterArgument: ""
+        counterArgument: "",
+        narrativeBias: ""
       }
     },
     marketSummary: {
