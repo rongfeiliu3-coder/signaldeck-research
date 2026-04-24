@@ -30,7 +30,7 @@ export class AkshareAdapter implements AShareDataAdapter {
     const response = await fetch(joinUrl(this.baseUrl, "/snapshot/workspace"), {
       headers: authHeaders(),
       cache: "no-store",
-      signal: AbortSignal.timeout(12000)
+      signal: AbortSignal.timeout(120000)
     });
 
     if (!response.ok) {
@@ -48,22 +48,22 @@ export class AkshareAdapter implements AShareDataAdapter {
       };
     }
 
-    const response = await fetch(joinUrl(this.baseUrl, "/snapshot/workspace?refresh=1"), {
+    const response = await fetch(joinUrl(this.baseUrl, "/health"), {
       headers: authHeaders(),
       cache: "no-store",
-      signal: AbortSignal.timeout(20000)
+      signal: AbortSignal.timeout(5000)
     });
 
     if (!response.ok) {
       return {
         ok: false,
-        message: `Akshare bridge 刷新失败，HTTP ${response.status}，当前回退到 Mock Fallback。`
+        message: `Akshare bridge 不可用，HTTP ${response.status}，当前回退到 Mock Fallback。`
       };
     }
 
     return {
       ok: true,
-      message: "Akshare bridge 已刷新，页面将优先使用 Akshare Live 数据。"
+      message: "Akshare bridge 可用，页面将优先使用 Akshare Live 数据；bridge 内部缓存会避免重复重请求。"
     };
   }
 }

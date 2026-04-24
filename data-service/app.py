@@ -109,7 +109,10 @@ def _collect_symbols(theme_baskets: List[Dict[str, Any]]) -> tuple[List[str], Di
 
 
 def _fetch_name_map() -> Dict[str, str]:
-  spot_df = ak.stock_zh_a_spot_em()
+  try:
+    spot_df = ak.stock_zh_a_spot_em()
+  except Exception:
+    return {}
   name_map: Dict[str, str] = {}
   if spot_df.empty:
     return name_map
@@ -128,16 +131,52 @@ def _fetch_name_map() -> Dict[str, str]:
 
 def _fetch_history(symbol: str) -> pd.DataFrame:
   plain_code = _symbol_to_plain_code(symbol)
+  prefixed_code = f"{_symbol_to_exchange(symbol).lower()}{plain_code}"
   window = _date_window()
-  history_df = ak.stock_zh_a_hist(
-    symbol=plain_code,
-    period="daily",
-    start_date=window["start"],
-    end_date=window["end"],
-    adjust=""
-  )
+  try:
+    history_df = ak.stock_zh_a_hist(
+      symbol=plain_code,
+      period="daily",
+      start_date=window["start"],
+      end_date=window["end"],
+      adjust=""
+    )
+  except Exception:
+    history_df = pd.DataFrame()
+
+  if history_df.empty:
+    try:
+      daily_df = ak.stock_zh_a_daily(
+        symbol=prefixed_code,
+        start_date=window["start"],
+        end_date=window["end"],
+        adjust=""
+      )
+      if not daily_df.empty:
+        history_df = daily_df.rename(columns={"date": "日期", "close": "收盘", "turnover": "换手率"})
+        history_df["换手率"] = history_df["换手率"].astype(float) * 100
+    except Exception:
+      history_df = pd.DataFrame()
+
+  if history_df.empty:
+    try:
+      tx_df = ak.stock_zh_a_hist_tx(
+        symbol=prefixed_code,
+        start_date=window["start"],
+        end_date=window["end"],
+        adjust=""
+      )
+      if not tx_df.empty:
+        history_df = tx_df.rename(columns={"date": "日期", "close": "收盘"})
+        history_df["换手率"] = 0.0
+    except Exception:
+      return pd.DataFrame()
+
   if history_df.empty:
     return history_df
+
+  if "日期" not in history_df.columns:
+    return pd.DataFrame()
 
   history_df["日期"] = pd.to_datetime(history_df["日期"])
   return history_df.sort_values("日期").reset_index(drop=True)
@@ -145,7 +184,10 @@ def _fetch_history(symbol: str) -> pd.DataFrame:
 
 def _fetch_individual_info(symbol: str) -> Dict[str, Any]:
   plain_code = _symbol_to_plain_code(symbol)
-  info_df = ak.stock_individual_info_em(symbol=plain_code)
+  try:
+    info_df = ak.stock_individual_info_em(symbol=plain_code)
+  except Exception:
+    return {}
   if info_df.empty:
     return {}
   return {str(row["item"]).strip(): row["value"] for _, row in info_df.iterrows()}
@@ -289,11 +331,11 @@ def _build_workspace_snapshot_uncached() -> Dict[str, Any]:
         "price": round(latest_close, 2),
         "marketCapCnyBn": round(_safe_float(_first_existing(info_map, ["总市值"])) / 1000000000.0, 2),
         "turnoverRate": round(latest_turnover, 4),
-        "turnoverDelta": round(turnover_delta, 4),
+        "turnoverDelta": round(float(turnover_delta), 4),
         "return1d": round(return_1d, 4),
         "return5d": round(return_5d, 4),
         "return20d": round(return_20d, 4),
-        "leaderScore": round(_compute_leader_score(return_1d, return_5d, return_20d, turnover_delta), 4),
+        "leaderScore": round(float(_compute_leader_score(return_1d, return_5d, return_20d, turnover_delta)), 4),
         "fundamentals": {key: round(value, 4) for key, value in financials.items()},
         "history": _build_history_payload(history_df)
       }
@@ -321,7 +363,9 @@ def build_workspace_snapshot(force_refresh: bool = False) -> Dict[str, Any]:
   with _cache_lock:
     cached_payload = _workspace_cache.get("payload")
     generated_at = float(_workspace_cache.get("generated_at") or 0.0)
-    if cached_payload and not force_refresh and now - generated_at < CACHE_TTL_SECONDS:
+    # Local-first research should stay responsive: normal page loads reuse the
+    # latest snapshot, while explicit refresh requests pull from Akshare again.
+    if cached_payload and not force_refresh:
       return cached_payload
 
     payload = _build_workspace_snapshot_uncached()

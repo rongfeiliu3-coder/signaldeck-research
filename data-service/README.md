@@ -60,7 +60,7 @@ AKSHARE_HISTORY_DAYS=90
 AKSHARE_LOOKBACK_BUFFER_DAYS=160
 ```
 
-`AKSHARE_CACHE_TTL_SECONDS=900` means the bridge reuses a snapshot for 15 minutes before requesting Akshare again.
+`AKSHARE_CACHE_TTL_SECONDS=900` is reported in `/health` as the freshness guide. For local-first responsiveness, normal page loads reuse the latest cached snapshot even after the guide expires. Use `?refresh=1` when you explicitly want to pull a new Akshare snapshot.
 
 ## Connect Next.js Locally
 
