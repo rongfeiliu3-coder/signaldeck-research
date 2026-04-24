@@ -166,10 +166,10 @@ export type FundDiagnostic = {
 
 export type OpportunityAssetType = "stock" | "fund" | "theme" | "sector";
 export type OpportunityCategory = "long-term" | "medium-term" | "short-term" | "high-risk";
-export type OpportunityStyle = "dividend" | "growth" | "cyclical" | "policy" | "sentiment" | "quality";
+export type OpportunityStyle = "dividend" | "growth" | "cyclical" | "policy" | "sentiment" | "quality" | "ai" | "energy";
 export type OpportunityHorizon = "long" | "medium" | "short";
 export type OpportunityConfidence = "high" | "medium" | "low";
-export type OpportunityRisk = "low" | "medium" | "high";
+export type OpportunityRisk = "low" | "medium" | "high" | "very-high";
 export type OpportunityDriver = "fundamentals-driven" | "sentiment-driven" | "policy-driven" | "mixed";
 
 export type OpportunityScoreBreakdown = {
@@ -181,6 +181,8 @@ export type OpportunityScoreBreakdown = {
   defensiveness: number;
   narrativeSupport: number;
   institutionalRelevance: number;
+  longTerm: number;
+  shortTerm: number;
   composite: number;
 };
 
@@ -195,6 +197,7 @@ export type OpportunityItem = {
   confidence: OpportunityConfidence;
   riskLevel: OpportunityRisk;
   driver: OpportunityDriver;
+  trackedThemeSlugs: string[];
   scoreBreakdown: OpportunityScoreBreakdown;
   whyNow: string;
   supportingEvidence: string[];

@@ -27,7 +27,7 @@ type SectorSnapshot = {
   avgQuality: number;
   avgDividendYield: number;
   avgMomentum: number;
-  topThemes: Array<{ name: string; weight: number }>;
+  topThemes: Array<{ slug: string; name: string; weight: number }>;
 };
 
 function clamp(value: number, min = 0, max = 100) {
@@ -56,6 +56,7 @@ function confidenceFromScore(score: number): OpportunityConfidence {
 }
 
 function riskFromCategory(category: OpportunityCategory, activity: number, quality: number): OpportunityRisk {
+  if (category === "high-risk" && activity >= 76 && quality < 50) return "very-high";
   if (category === "high-risk" || activity >= 78 || quality < 45) return "high";
   if (category === "short-term" || activity >= 62) return "medium";
   return "low";
@@ -72,6 +73,8 @@ function pickStyles(source: string[], fallback: OpportunityStyle[] = ["quality"]
   const styles: OpportunityStyle[] = [];
   if (source.some((tag) => tag.includes("dividend") || tag.includes("cash-flow") || tag.includes("value"))) styles.push("dividend");
   if (source.some((tag) => tag.includes("growth") || tag.includes("ai"))) styles.push("growth");
+  if (source.some((tag) => tag.includes("ai") || tag.includes("算力"))) styles.push("ai");
+  if (source.some((tag) => tag.includes("energy") || tag.includes("utilities") || tag.includes("power") || tag.includes("电力") || tag.includes("低碳"))) styles.push("energy");
   if (source.some((tag) => tag.includes("cyclical") || tag.includes("rotation") || tag.includes("resources"))) styles.push("cyclical");
   if (source.some((tag) => tag.includes("policy") || tag.includes("state-owned"))) styles.push("policy");
   if (source.some((tag) => tag.includes("theme") || tag.includes("beta") || tag.includes("small-cap"))) styles.push("sentiment");
@@ -114,7 +117,23 @@ function horizonFromCategory(category: OpportunityCategory): OpportunityHorizon 
   }
 }
 
-function makeScoreBreakdown(input: Omit<OpportunityScoreBreakdown, "composite">): OpportunityScoreBreakdown {
+function makeScoreBreakdown(input: Omit<OpportunityScoreBreakdown, "composite" | "longTerm" | "shortTerm">): OpportunityScoreBreakdown {
+  const longTerm = (
+    input.fundamentalQuality * 0.34 +
+    input.defensiveness * 0.26 +
+    (100 - input.turnoverActivity) * 0.12 +
+    input.institutionalRelevance * 0.12 +
+    input.narrativeSupport * 0.1 +
+    input.marketStrength * 0.06
+  );
+  const shortTerm = (
+    input.marketStrength * 0.28 +
+    input.breadthParticipation * 0.18 +
+    input.turnoverActivity * 0.2 +
+    input.narrativeSupport * 0.16 +
+    input.leaderConcentration * 0.12 +
+    input.fundamentalQuality * 0.06
+  );
   const composite = (
     input.marketStrength * 0.2 +
     input.breadthParticipation * 0.14 +
@@ -128,8 +147,21 @@ function makeScoreBreakdown(input: Omit<OpportunityScoreBreakdown, "composite">)
 
   return {
     ...input,
+    longTerm: Number(clamp(longTerm).toFixed(1)),
+    shortTerm: Number(clamp(shortTerm).toFixed(1)),
     composite: Number(composite.toFixed(1))
   };
+}
+
+function practicalLabel(category: OpportunityCategory, score: OpportunityScoreBreakdown, driver: OpportunityDriver) {
+  if (category === "high-risk") return " 高风险题材，不适合重仓。";
+  if (score.defensiveness >= 70 && score.fundamentalQuality >= 58) return " 高股息防御型。";
+  if (driver === "sentiment-driven" && score.fundamentalQuality < 58) return " 情绪驱动强，基本面支撑弱。";
+  if (score.longTerm >= 68 && score.shortTerm < 58) return " 基本面较稳，但短线弹性有限。";
+  if (category === "long-term") return " 适合长线观察。";
+  if (category === "medium-term") return " 适合中线跟踪。";
+  if (category === "short-term") return " 偏短线博弈。";
+  return " 需要继续观察。";
 }
 
 function buildSectorSnapshots(workspace: MarketWorkspace): SectorSnapshot[] {
@@ -163,6 +195,7 @@ function buildSectorSnapshots(workspace: MarketWorkspace): SectorSnapshot[] {
       avgDividendYield: average(members.map((item) => item.fundamentals.dividendYield)),
       avgMomentum: average(members.map((item) => item.momentumScore ?? 0)),
       topThemes: topThemes.map((item) => ({
+        slug: item.name,
         name: workspace.themes.find((theme) => theme.slug === item.name)?.name ?? item.name,
         weight: item.weight / Math.max(1, members.length)
       }))
@@ -219,8 +252,9 @@ function buildStockOpportunity(stock: SecurityRecord, workspace: MarketWorkspace
     confidence: confidenceFromScore(scoreBreakdown.composite),
     riskLevel: riskFromCategory(category, scoreBreakdown.turnoverActivity, scoreBreakdown.fundamentalQuality),
     driver,
+    trackedThemeSlugs: stock.themeTags,
     scoreBreakdown,
-    whyNow: `${stock.name} 入选，主要因为价格强度 ${scoreBreakdown.marketStrength.toFixed(0)}、质量 ${scoreBreakdown.fundamentalQuality.toFixed(0)}、题材支持 ${scoreBreakdown.narrativeSupport.toFixed(0)}。`,
+    whyNow: `${stock.name} 入选，主要因为价格强度 ${scoreBreakdown.marketStrength.toFixed(0)}、质量 ${scoreBreakdown.fundamentalQuality.toFixed(0)}、题材支持 ${scoreBreakdown.narrativeSupport.toFixed(0)}。${practicalLabel(category, scoreBreakdown, driver)}`,
     supportingEvidence: [
       `20日涨幅 ${(stock.return20d * 100).toFixed(1)}%，5日涨幅 ${(stock.return5d * 100).toFixed(1)}%。`,
       `关联主题广度 ${(themeBreadth * 100).toFixed(1)}%，换手变化 ${(stock.turnoverDelta * 100).toFixed(1)}%。`,
@@ -284,8 +318,9 @@ function buildThemeOpportunity(theme: ThemeSnapshot, workspace: MarketWorkspace)
     confidence: confidenceFromScore(scoreBreakdown.composite),
     riskLevel: riskFromCategory(category, scoreBreakdown.turnoverActivity, scoreBreakdown.fundamentalQuality),
     driver,
+    trackedThemeSlugs: [theme.slug],
     scoreBreakdown,
-    whyNow: `${theme.name} 进入机会列表，因为热度、广度和质量分没有被混成一个黑箱分，当前三项同时在线。`,
+    whyNow: `${theme.name} 进入机会列表，因为热度、广度和质量分没有被混成一个黑箱分，当前三项同时在线。${practicalLabel(category, scoreBreakdown, driver)}`,
     supportingEvidence: [
       `今日热度 ${theme.leadership.today.heat.toFixed(1)}，5日热度 ${theme.leadership.fiveDay.heat.toFixed(1)}，20日热度 ${theme.leadership.twentyDay.heat.toFixed(1)}。`,
       `内部广度 ${(theme.internalBreadth * 100).toFixed(1)}%，前五贡献 ${(theme.leadership.today.topFiveContribution * 100).toFixed(0)}%。`,
@@ -338,8 +373,9 @@ function buildSectorOpportunity(sector: SectorSnapshot): OpportunityItem {
     confidence: confidenceFromScore(scoreBreakdown.composite),
     riskLevel: riskFromCategory(category, scoreBreakdown.turnoverActivity, scoreBreakdown.fundamentalQuality),
     driver,
+    trackedThemeSlugs: sector.topThemes.map((theme) => theme.slug),
     scoreBreakdown,
-    whyNow: `${sector.name} 入选，主要看的是行业层面的强度变化和参与扩散，而不是单只龙头行情。`,
+    whyNow: `${sector.name} 入选，主要看的是行业层面的强度变化和参与扩散，而不是单只龙头行情。${practicalLabel(category, scoreBreakdown, driver)}`,
     supportingEvidence: [
       `1日/5日/20日行业均涨分别为 ${(sector.avgReturn1d * 100).toFixed(1)}% / ${(sector.avgReturn5d * 100).toFixed(1)}% / ${(sector.avgReturn20d * 100).toFixed(1)}%。`,
       `行业广度 ${(sector.breadth * 100).toFixed(1)}%，平均质量分 ${sector.avgQuality.toFixed(1)}。`,
@@ -399,8 +435,9 @@ function buildFundOpportunity(fund: FundDiagnostic, workspace: MarketWorkspace):
     confidence: confidenceFromScore(scoreBreakdown.composite),
     riskLevel: riskFromCategory(category, scoreBreakdown.turnoverActivity, scoreBreakdown.fundamentalQuality),
     driver,
+    trackedThemeSlugs: fund.themeExposure.map((theme) => theme.slug),
     scoreBreakdown,
-    whyNow: `${fund.name} 入选，因为它能把板块机会和资金配置放到同一个框架里看。`,
+    whyNow: `${fund.name} 入选，因为它能把板块机会和资金配置放到同一个框架里看。${practicalLabel(category, scoreBreakdown, driver)}`,
     supportingEvidence: [
       `加权5日强度 ${(weightedReturn5d * 100).toFixed(1)}%，加权20日强度 ${(weightedReturn20d * 100).toFixed(1)}%。`,
       `正收益持仓权重 ${(breadth * 100).toFixed(1)}%，跟踪主题重合 ${(fund.trackedThemeOverlap.reduce((acc, item) => acc + item.weight, 0) * 100).toFixed(1)}%。`,
@@ -438,7 +475,7 @@ export async function buildOpportunityLab(workspace: MarketWorkspace): Promise<O
   };
 
   return {
-    opportunities: opportunities.slice(0, 16),
+    opportunities,
     byCategory,
     aiSummary: await opportunityAgentWorkflow.generateOpportunityLabAiSummary(opportunities.slice(0, 8))
   };

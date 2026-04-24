@@ -39,13 +39,19 @@
 - [x] Add stock / fund / theme / sector opportunity cards with evidence and counter-evidence.
 - [x] Add input-driven diagnostics for stock code, fund code, theme name, and sector name.
 - [x] Add AI adapter scaffolding and opportunity-agent workflow steps.
+- [x] Add practical ranking controls for risk, quality, market strength, defensiveness, and long/short suitability.
+- [x] Add filters for type, horizon, risk, style, and tracked themes.
+- [x] Add dense opportunity comparison table.
+- [x] Add separate long-term tracking and short-term trading scores.
 - [ ] Add real public fund codes and holdings adapters.
 
 ## Phase G: live data and AI upgrades
 
 - [ ] Improve Akshare live coverage for industry classification and valuation fields.
 - [ ] Add public fund data adapter with disclosure-date metadata.
-- [ ] Add live AI adapters behind environment variables.
+- [x] Add DeepSeek-compatible AI adapter behind environment variables.
+- [x] Add `.env.example` with placeholder-only provider variables.
+- [ ] Add additional live AI adapters behind environment variables.
 - [ ] Add provider-specific prompt routing and model selection.
 - [ ] Add stale-data banners when market / financial / fund datasets are out of sync.
 

@@ -1,3 +1,4 @@
+import { MockResearchAiAdapter } from "@/lib/ai/adapters/mock";
 import { getResearchAiAdapter } from "@/lib/ai/provider";
 import { OpportunityAiSummary, OpportunityItem } from "@/lib/types";
 
@@ -41,16 +42,22 @@ export async function generateOpportunityLabAiSummary(opportunities: Opportunity
   ];
   const counterEvidence = buildBearishTable(opportunities);
   const opportunityTitles = classifyOpportunityFocus(opportunities);
-  const result = await adapter.summarizeOpportunityLab({
+  const input = {
     topic: "机会分析",
     structuredEvidence,
     counterEvidence,
     opportunityTitles
+  };
+  const fallbackAdapter = new MockResearchAiAdapter();
+  let usedAdapter = adapter;
+  const result = await adapter.summarizeOpportunityLab(input).catch(async () => {
+    usedAdapter = fallbackAdapter;
+    return fallbackAdapter.summarizeOpportunityLab(input);
   });
 
   return {
-    provider: adapter.label,
-    mode: adapter.mode,
+    provider: usedAdapter.label,
+    mode: usedAdapter.mode,
     overview: result.overview,
     watchlistNote: result.watchlistNote,
     counterArgument: result.counterArgument
