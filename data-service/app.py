@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import time
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List
 
 import akshare as ak
 import pandas as pd
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -21,38 +21,23 @@ METADATA_PATH = BASE_DIR / "metadata.json"
 REQUEST_SLEEP_MS = int(os.getenv("AKSHARE_SLEEP_MS", "120"))
 HISTORY_DAYS = int(os.getenv("AKSHARE_HISTORY_DAYS", "90"))
 LOOKBACK_BUFFER_DAYS = int(os.getenv("AKSHARE_LOOKBACK_BUFFER_DAYS", "160"))
+CACHE_TTL_SECONDS = int(os.getenv("AKSHARE_CACHE_TTL_SECONDS", "900"))
+
+_cache_lock = threading.Lock()
+_workspace_cache: Dict[str, Any] = {"payload": None, "generated_at": 0.0}
 
 
-@dataclass
-class SecuritySnapshot:
-  symbol: str
-  name: str
-  exchange: str
-  industry: str
-  sector: str
-  style_tags: List[str]
-  theme_tags: List[str]
-  description: str
-  price: float
-  market_cap_cny_bn: float
-  turnover_rate: float
-  turnover_delta: float
-  return_1d: float
-  return_5d: float
-  return_20d: float
-  leader_score: float
-  fundamentals: Dict[str, float]
-  history: List[Dict[str, Any]]
+def _load_json(path: Path) -> Any:
+  with path.open("r", encoding="utf-8") as handle:
+    return json.load(handle)
 
 
 def _load_theme_baskets() -> List[Dict[str, Any]]:
-  with THEME_CONFIG_PATH.open("r", encoding="utf-8") as handle:
-    return json.load(handle)
+  return _load_json(THEME_CONFIG_PATH)
 
 
 def _load_metadata() -> Dict[str, Dict[str, Any]]:
-  with METADATA_PATH.open("r", encoding="utf-8") as handle:
-    return json.load(handle)
+  return _load_json(METADATA_PATH)
 
 
 def _sleep_between_calls() -> None:
@@ -82,8 +67,20 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
     return default
 
 
-def _safe_history_value(row: pd.Series, key: str) -> float:
-  return _safe_float(row.get(key), 0.0)
+def _first_existing(row: pd.Series | Dict[str, Any], keys: List[str], default: Any = None) -> Any:
+  for key in keys:
+    if key in row:
+      value = row[key]
+      if value is not None:
+        return value
+  return default
+
+
+def _find_column(columns: List[str], contains: List[str]) -> str | None:
+  for column in columns:
+    if any(token in str(column) for token in contains):
+      return str(column)
+  return None
 
 
 def _symbol_to_plain_code(symbol: str) -> str:
@@ -97,27 +94,35 @@ def _symbol_to_exchange(symbol: str) -> str:
 def _date_window() -> Dict[str, str]:
   end_date = datetime.now()
   start_date = end_date - timedelta(days=LOOKBACK_BUFFER_DAYS)
-  return {
-    "start": start_date.strftime("%Y%m%d"),
-    "end": end_date.strftime("%Y%m%d")
-  }
+  return {"start": start_date.strftime("%Y%m%d"), "end": end_date.strftime("%Y%m%d")}
+
+
+def _collect_symbols(theme_baskets: List[Dict[str, Any]]) -> tuple[List[str], Dict[str, List[str]]]:
+  symbols: List[str] = []
+  theme_map: Dict[str, List[str]] = {}
+  for basket in theme_baskets:
+    for symbol in basket.get("symbols", []):
+      if symbol not in symbols:
+        symbols.append(symbol)
+      theme_map.setdefault(symbol, []).append(basket["slug"])
+  return symbols, theme_map
 
 
 def _fetch_name_map() -> Dict[str, str]:
   spot_df = ak.stock_zh_a_spot_em()
-  name_map = {}
-  if not spot_df.empty:
-    for _, row in spot_df.iterrows():
-      code = str(row.get("代码", "")).zfill(6)
-      name = str(row.get("名称", "")).strip()
-      if code and name:
-        if code.startswith("6"):
-          symbol = f"{code}.SH"
-        elif code.startswith(("0", "3")):
-          symbol = f"{code}.SZ"
-        else:
-          continue
-        name_map[symbol] = name
+  name_map: Dict[str, str] = {}
+  if spot_df.empty:
+    return name_map
+
+  for _, row in spot_df.iterrows():
+    code = str(row.get("代码", "")).zfill(6)
+    name = str(row.get("名称", "")).strip()
+    if not code or not name:
+      continue
+    if code.startswith("6"):
+      name_map[f"{code}.SH"] = name
+    elif code.startswith(("0", "3")):
+      name_map[f"{code}.SZ"] = name
   return name_map
 
 
@@ -135,8 +140,7 @@ def _fetch_history(symbol: str) -> pd.DataFrame:
     return history_df
 
   history_df["日期"] = pd.to_datetime(history_df["日期"])
-  history_df = history_df.sort_values("日期").reset_index(drop=True)
-  return history_df
+  return history_df.sort_values("日期").reset_index(drop=True)
 
 
 def _fetch_individual_info(symbol: str) -> Dict[str, Any]:
@@ -147,72 +151,74 @@ def _fetch_individual_info(symbol: str) -> Dict[str, Any]:
   return {str(row["item"]).strip(): row["value"] for _, row in info_df.iterrows()}
 
 
+def _empty_financials() -> Dict[str, float]:
+  return {
+    "revenueGrowth": 0.0,
+    "netProfitGrowth": 0.0,
+    "roe": 0.0,
+    "grossMargin": 0.0,
+    "debtRatio": 0.0,
+    "operatingCashFlow": 0.0,
+    "dividendYield": 0.0
+  }
+
+
 def _fetch_financials(symbol: str) -> Dict[str, float]:
   plain_code = _symbol_to_plain_code(symbol)
   try:
     financial_df = ak.stock_financial_analysis_indicator(symbol=plain_code)
   except Exception:
-    return {
-      "revenueGrowth": 0.0,
-      "netProfitGrowth": 0.0,
-      "roe": 0.0,
-      "grossMargin": 0.0,
-      "debtRatio": 0.0,
-      "operatingCashFlow": 0.0,
-      "dividendYield": 0.0
-    }
+    return _empty_financials()
 
   if financial_df.empty:
-    return {
-      "revenueGrowth": 0.0,
-      "netProfitGrowth": 0.0,
-      "roe": 0.0,
-      "grossMargin": 0.0,
-      "debtRatio": 0.0,
-      "operatingCashFlow": 0.0,
-      "dividendYield": 0.0
-    }
+    return _empty_financials()
 
   latest = financial_df.iloc[0]
+  columns = [str(column) for column in financial_df.columns]
+  revenue_col = _find_column(columns, ["主营业务收入增长率", "营业收入增长率"])
+  profit_col = _find_column(columns, ["净利润增长率"])
+  roe_col = _find_column(columns, ["净资产收益率", "ROE"])
+  margin_col = _find_column(columns, ["销售毛利率", "毛利率"])
+  debt_col = _find_column(columns, ["资产负债率"])
+  cash_col = _find_column(columns, ["经营现金净流量", "经营现金流"])
+  dividend_col = _find_column(columns, ["股息发放率", "股息率", "分红"])
+
   return {
-    "revenueGrowth": _safe_float(latest.get("主营业务收入增长率(%)")) / 100.0,
-    "netProfitGrowth": _safe_float(latest.get("净利润增长率(%)")) / 100.0,
-    "roe": _safe_float(latest.get("净资产收益率(%)")) / 100.0,
-    "grossMargin": _safe_float(latest.get("销售毛利率(%)")) / 100.0,
-    "debtRatio": _safe_float(latest.get("资产负债率(%)")) / 100.0,
-    "operatingCashFlow": _safe_float(latest.get("经营现金净流量与净利润的比率(%)")),
-    "dividendYield": _safe_float(latest.get("股息发放率(%)")) / 100.0
+    "revenueGrowth": _safe_float(latest.get(revenue_col), 0.0) / 100.0 if revenue_col else 0.0,
+    "netProfitGrowth": _safe_float(latest.get(profit_col), 0.0) / 100.0 if profit_col else 0.0,
+    "roe": _safe_float(latest.get(roe_col), 0.0) / 100.0 if roe_col else 0.0,
+    "grossMargin": _safe_float(latest.get(margin_col), 0.0) / 100.0 if margin_col else 0.0,
+    "debtRatio": _safe_float(latest.get(debt_col), 0.0) / 100.0 if debt_col else 0.0,
+    "operatingCashFlow": _safe_float(latest.get(cash_col), 0.0) if cash_col else 0.0,
+    "dividendYield": _safe_float(latest.get(dividend_col), 0.0) / 100.0 if dividend_col else 0.0
   }
 
 
 def _build_history_payload(history_df: pd.DataFrame) -> List[Dict[str, Any]]:
+  if history_df.empty:
+    return []
   trimmed = history_df.tail(HISTORY_DAYS)
   return [
-    {
-      "date": row["日期"].strftime("%Y-%m-%d"),
-      "value": round(_safe_history_value(row, "收盘"), 2)
-    }
+    {"date": row["日期"].strftime("%Y-%m-%d"), "value": round(_safe_float(row.get("收盘")), 2)}
     for _, row in trimmed.iterrows()
   ]
 
 
 def _compute_return(history_df: pd.DataFrame, sessions: int) -> float:
-  if history_df.empty:
+  if history_df.empty or "收盘" not in history_df.columns:
     return 0.0
   closes = history_df["收盘"].astype(float).tolist()
   if len(closes) <= sessions:
     return 0.0
   latest = closes[-1]
   base = closes[-(sessions + 1)]
-  if not base:
-    return 0.0
-  return (latest - base) / base
+  return 0.0 if not base else (latest - base) / base
 
 
 def _compute_turnover_delta(history_df: pd.DataFrame) -> float:
   if history_df.empty or "换手率" not in history_df.columns or len(history_df) < 6:
     return 0.0
-  latest = _safe_float(history_df.iloc[-1]["换手率"]) / 100.0
+  latest = _safe_float(history_df.iloc[-1].get("换手率")) / 100.0
   baseline = history_df.tail(6).head(5)["换手率"].apply(_safe_float).mean() / 100.0
   return latest - baseline
 
@@ -241,19 +247,11 @@ def _default_fund_baskets(theme_baskets: List[Dict[str, Any]]) -> List[Dict[str,
   return funds
 
 
-def build_workspace_snapshot() -> Dict[str, Any]:
+def _build_workspace_snapshot_uncached() -> Dict[str, Any]:
   theme_baskets = _load_theme_baskets()
   metadata_map = _load_metadata()
   name_map = _fetch_name_map()
-
-  all_symbols = []
-  theme_map: Dict[str, List[str]] = {}
-  for basket in theme_baskets:
-    for symbol in basket.get("symbols", []):
-      if symbol not in all_symbols:
-        all_symbols.append(symbol)
-      theme_map.setdefault(symbol, []).append(basket["slug"])
-
+  all_symbols, theme_map = _collect_symbols(theme_baskets)
   securities: List[Dict[str, Any]] = []
   as_of_date = datetime.now().strftime("%Y-%m-%d")
 
@@ -268,7 +266,7 @@ def build_workspace_snapshot() -> Dict[str, Any]:
     latest_close = 0.0
     latest_turnover = 0.0
     if not history_df.empty:
-      latest_close = _safe_float(history_df.iloc[-1]["收盘"])
+      latest_close = _safe_float(history_df.iloc[-1].get("收盘"))
       latest_turnover = _safe_float(history_df.iloc[-1].get("换手率")) / 100.0
       as_of_date = history_df.iloc[-1]["日期"].strftime("%Y-%m-%d")
 
@@ -276,45 +274,71 @@ def build_workspace_snapshot() -> Dict[str, Any]:
     return_1d = _compute_return(history_df, 1)
     return_5d = _compute_return(history_df, 5)
     return_20d = _compute_return(history_df, 20)
-
     base_meta = metadata_map.get(symbol, {})
+
     securities.append(
       {
         "symbol": symbol,
-        "name": name_map.get(symbol, str(info_map.get("股票简称", symbol))),
+        "name": name_map.get(symbol, str(_first_existing(info_map, ["股票简称"], symbol))),
         "exchange": _symbol_to_exchange(symbol),
-        "industry": str(info_map.get("行业", base_meta.get("industry", "A-Share"))),
+        "industry": str(_first_existing(info_map, ["行业"], base_meta.get("industry", "A-Share"))),
         "sector": base_meta.get("sector", "A-Share"),
         "styleTags": base_meta.get("styleTags", []),
         "themeTags": theme_map.get(symbol, []),
-        "description": base_meta.get("description", "A 股研究标的。"),
+        "description": base_meta.get("description", "A-share research constituent."),
         "price": round(latest_close, 2),
-        "marketCapCnyBn": round(_safe_float(info_map.get("总市值")) / 1000000000.0, 2),
+        "marketCapCnyBn": round(_safe_float(_first_existing(info_map, ["总市值"])) / 1000000000.0, 2),
         "turnoverRate": round(latest_turnover, 4),
         "turnoverDelta": round(turnover_delta, 4),
         "return1d": round(return_1d, 4),
         "return5d": round(return_5d, 4),
         "return20d": round(return_20d, 4),
         "leaderScore": round(_compute_leader_score(return_1d, return_5d, return_20d, turnover_delta), 4),
-        "fundamentals": {
-          "revenueGrowth": round(financials["revenueGrowth"], 4),
-          "netProfitGrowth": round(financials["netProfitGrowth"], 4),
-          "roe": round(financials["roe"], 4),
-          "grossMargin": round(financials["grossMargin"], 4),
-          "debtRatio": round(financials["debtRatio"], 4),
-          "operatingCashFlow": round(financials["operatingCashFlow"], 4),
-          "dividendYield": round(financials["dividendYield"], 4)
-        },
+        "fundamentals": {key: round(value, 4) for key, value in financials.items()},
         "history": _build_history_payload(history_df)
       }
     )
 
   return {
     "asOfDate": as_of_date,
-    "universeName": "A-share Theme Research Universe",
+    "universeName": "A-share configured theme universe",
     "themeBaskets": theme_baskets,
     "securities": securities,
-    "funds": _default_fund_baskets(theme_baskets)
+    "funds": _default_fund_baskets(theme_baskets),
+    "sourceStatus": {
+      "provider": "akshare",
+      "mode": "live",
+      "universe": "configured-theme-baskets",
+      "symbolCount": len(all_symbols),
+      "cacheTtlSeconds": CACHE_TTL_SECONDS,
+      "generatedAt": datetime.now().isoformat(timespec="seconds")
+    }
+  }
+
+
+def build_workspace_snapshot(force_refresh: bool = False) -> Dict[str, Any]:
+  now = time.time()
+  with _cache_lock:
+    cached_payload = _workspace_cache.get("payload")
+    generated_at = float(_workspace_cache.get("generated_at") or 0.0)
+    if cached_payload and not force_refresh and now - generated_at < CACHE_TTL_SECONDS:
+      return cached_payload
+
+    payload = _build_workspace_snapshot_uncached()
+    _workspace_cache["payload"] = payload
+    _workspace_cache["generated_at"] = time.time()
+    return payload
+
+
+def _cache_status() -> Dict[str, Any]:
+  payload = _workspace_cache.get("payload")
+  generated_at = float(_workspace_cache.get("generated_at") or 0.0)
+  age_seconds = int(time.time() - generated_at) if payload else None
+  return {
+    "enabled": True,
+    "ttlSeconds": CACHE_TTL_SECONDS,
+    "hasCachedSnapshot": bool(payload),
+    "ageSeconds": age_seconds
   }
 
 
@@ -336,11 +360,7 @@ def build_market_leadership_snapshot(workspace: Dict[str, Any]) -> Dict[str, Any
         "avgReturn20d": round(sum(item["return20d"] for item in members) / len(members), 4) if members else 0.0
       }
     )
-
-  return {
-    "asOfDate": workspace["asOfDate"],
-    "themes": themes
-  }
+  return {"asOfDate": workspace["asOfDate"], "themes": themes}
 
 
 def build_theme_snapshot(workspace: Dict[str, Any]) -> Dict[str, Any]:
@@ -357,11 +377,7 @@ def build_theme_snapshot(workspace: Dict[str, Any]) -> Dict[str, Any]:
         "constituents": members
       }
     )
-
-  return {
-    "asOfDate": workspace["asOfDate"],
-    "themes": themes
-  }
+  return {"asOfDate": workspace["asOfDate"], "themes": themes}
 
 
 def build_fundamentals_snapshot(workspace: Dict[str, Any]) -> Dict[str, Any]:
@@ -380,34 +396,49 @@ def build_fundamentals_snapshot(workspace: Dict[str, Any]) -> Dict[str, Any]:
   }
 
 
+def _force_refresh_requested() -> bool:
+  return request.args.get("refresh") in {"1", "true", "yes"}
+
+
 app = Flask(__name__)
 
 
 @app.get("/health")
 def health() -> Any:
-  return jsonify({"ok": True, "service": "akshare-data-bridge"})
+  theme_baskets = _load_theme_baskets()
+  symbols, _ = _collect_symbols(theme_baskets)
+  return jsonify(
+    {
+      "ok": True,
+      "service": "akshare-data-bridge",
+      "mode": "local-first",
+      "universe": "configured-theme-baskets",
+      "symbolCount": len(symbols),
+      "cache": _cache_status()
+    }
+  )
 
 
 @app.get("/snapshot/workspace")
 def snapshot_workspace() -> Any:
-  return jsonify(build_workspace_snapshot())
+  return jsonify(build_workspace_snapshot(force_refresh=_force_refresh_requested()))
 
 
 @app.get("/snapshot/market-leadership")
 def snapshot_market_leadership() -> Any:
-  workspace = build_workspace_snapshot()
+  workspace = build_workspace_snapshot(force_refresh=_force_refresh_requested())
   return jsonify(build_market_leadership_snapshot(workspace))
 
 
 @app.get("/snapshot/themes")
 def snapshot_themes() -> Any:
-  workspace = build_workspace_snapshot()
+  workspace = build_workspace_snapshot(force_refresh=_force_refresh_requested())
   return jsonify(build_theme_snapshot(workspace))
 
 
 @app.get("/snapshot/fundamentals")
 def snapshot_fundamentals() -> Any:
-  workspace = build_workspace_snapshot()
+  workspace = build_workspace_snapshot(force_refresh=_force_refresh_requested())
   return jsonify(build_fundamentals_snapshot(workspace))
 
 

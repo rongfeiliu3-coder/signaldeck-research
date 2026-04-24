@@ -58,13 +58,14 @@ export async function refreshResearchWorkspace() {
   const adapter = getConfiguredAdapter();
   const probe = await adapter.refreshSnapshot();
   const { status } = await resolveResearchData();
+  const message = status.fallbackTriggered
+    ? `实时数据不可用，已回退到 Mock Fallback。原因：${status.fallbackReason ?? "unknown"}`
+    : probe.message;
 
   return {
     ok: probe.ok || status.fallbackTriggered,
     provider: status.activeLabel,
     fallbackTriggered: status.fallbackTriggered,
-    message: status.fallbackTriggered
-      ? `实时数据不可用，已回退到 mock。原因: ${status.fallbackReason ?? "unknown"}`
-      : probe.message
+    message
   };
 }

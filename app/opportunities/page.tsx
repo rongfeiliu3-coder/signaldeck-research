@@ -178,7 +178,7 @@ export default async function OpportunitiesPage({
             <div className="rounded-xl border border-cyan/20 bg-cyan/[0.06] p-4">
               <p className="text-xs text-slate-500">Data Status</p>
               <p className="mt-2 text-lg font-semibold text-white">
-                {workspace.providerStatus.mode === "live" ? "真实数据" : "Mock / 回退"}
+                {workspace.providerStatus.mode === "live" ? "Akshare Live" : "Mock Fallback"}
               </p>
               <p className="mt-1 text-xs text-slate-500">{workspace.providerStatus.current}</p>
             </div>

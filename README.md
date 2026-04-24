@@ -108,23 +108,36 @@ Mock data requires no external service:
 DATA_PROVIDER=mock
 ```
 
-Akshare bridge mode uses the Python service in `data-service/`:
+Akshare bridge mode uses the local Python service in `data-service/`:
 
 ```env
 DATA_PROVIDER=akshare
 AKSHARE_API_URL=http://127.0.0.1:8000
+AKSHARE_CACHE_TTL_SECONDS=900
 ```
 
-The app does not require Akshare to run. If the bridge is unavailable, the provider layer falls back to mock data so Vercel previews stay usable.
+The app does not require Akshare to start. If the bridge is unavailable, the provider layer automatically falls back to mock data so local development and Vercel previews stay usable.
 
 Run the bridge locally:
 
-```bash
-cd data-service
+```powershell
+cd C:\quantize\data-service
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 python app.py
+```
+
+Check the bridge:
+
+```txt
+http://127.0.0.1:8000/health
+```
+
+Force a bridge refresh, bypassing the in-memory cache:
+
+```txt
+http://127.0.0.1:8000/snapshot/workspace?refresh=1
 ```
 
 Bridge endpoints:
@@ -135,14 +148,32 @@ Bridge endpoints:
 - `GET /snapshot/themes`
 - `GET /snapshot/fundamentals`
 
+Akshare bridge defaults:
+
+- local-first URL: `http://127.0.0.1:8000`
+- default scan universe: configured theme baskets only
+- default cache TTL: 900 seconds
+- no full-market A-share scan by default
+- no paid server required for local research
+
 ## Visible Status
 
 Opportunity Lab shows:
 
-- `Data Status`: whether market data is live or mock/fallback.
+- `Data Status`: `Akshare Live` or `Mock Fallback`.
 - `AI Status`: whether summaries are using DeepSeek or mock/disabled AI.
 
 This makes it clear whether a research conclusion is powered by live providers or fallback data.
+
+## Vercel And Localhost
+
+Vercel cannot access your computer's `localhost` or `127.0.0.1`.
+
+For production live Akshare data, set `AKSHARE_API_URL` to a public bridge URL. That could be a small VPS or hosted Python service later. For now, the recommended setup is:
+
+- local research: run the bridge on your computer and use `AKSHARE_API_URL=http://127.0.0.1:8000`
+- Vercel preview/production: keep mock fallback unless you intentionally deploy a public bridge
+- no Supabase or paid server is required for this local-first phase
 
 ## Provider Architecture
 

@@ -5,9 +5,13 @@ function joinUrl(baseUrl: string, path: string) {
   return `${baseUrl.replace(/\/+$/, "")}${path}`;
 }
 
+function authHeaders() {
+  return process.env.AKSHARE_API_KEY ? { Authorization: `Bearer ${process.env.AKSHARE_API_KEY}` } : undefined;
+}
+
 export class AkshareAdapter implements AShareDataAdapter {
   readonly id = "akshare" as const;
-  readonly label = "Akshare Bridge";
+  readonly label = "Akshare Live";
   readonly mode = "live" as const;
 
   private get baseUrl() {
@@ -24,8 +28,9 @@ export class AkshareAdapter implements AShareDataAdapter {
     }
 
     const response = await fetch(joinUrl(this.baseUrl, "/snapshot/workspace"), {
-      headers: process.env.AKSHARE_API_KEY ? { Authorization: `Bearer ${process.env.AKSHARE_API_KEY}` } : undefined,
-      cache: "no-store"
+      headers: authHeaders(),
+      cache: "no-store",
+      signal: AbortSignal.timeout(12000)
     });
 
     if (!response.ok) {
@@ -39,25 +44,26 @@ export class AkshareAdapter implements AShareDataAdapter {
     if (!this.baseUrl) {
       return {
         ok: false,
-        message: "AKSHARE_API_URL 未配置，当前将使用 mock 数据。"
+        message: "AKSHARE_API_URL 未配置，当前使用 Mock Fallback。"
       };
     }
 
-    const response = await fetch(joinUrl(this.baseUrl, "/health"), {
-      headers: process.env.AKSHARE_API_KEY ? { Authorization: `Bearer ${process.env.AKSHARE_API_KEY}` } : undefined,
-      cache: "no-store"
+    const response = await fetch(joinUrl(this.baseUrl, "/snapshot/workspace?refresh=1"), {
+      headers: authHeaders(),
+      cache: "no-store",
+      signal: AbortSignal.timeout(20000)
     });
 
     if (!response.ok) {
       return {
         ok: false,
-        message: `Akshare bridge 不可用，HTTP ${response.status}，当前将回退到 mock 数据。`
+        message: `Akshare bridge 刷新失败，HTTP ${response.status}，当前回退到 Mock Fallback。`
       };
     }
 
     return {
       ok: true,
-      message: "Akshare bridge 可用，后续页面刷新将优先使用实时 A 股数据。"
+      message: "Akshare bridge 已刷新，页面将优先使用 Akshare Live 数据。"
     };
   }
 }

@@ -69,7 +69,10 @@ export default async function HomePage() {
             <div className="mt-4 space-y-3 text-sm text-slate-300">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                 <p className="text-xs text-slate-500">Provider</p>
-                <p className="mt-2 text-lg font-semibold text-white">{workspace.providerStatus.current}</p>
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {workspace.providerStatus.mode === "live" ? "Akshare Live" : "Mock Fallback"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">{workspace.providerStatus.current}</p>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                 <p className="text-xs text-slate-500">As of</p>
