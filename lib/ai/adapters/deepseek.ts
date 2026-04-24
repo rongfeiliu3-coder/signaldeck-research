@@ -15,11 +15,11 @@ type DeepSeekResponse = {
 
 function buildPrompt(input: OpportunityAiInput) {
   return [
-    `主题：${input.topic}`,
-    `机会对象：${input.opportunityTitles.join("、") || "暂无"}`,
-    `结构化证据：${input.structuredEvidence.join("；") || "暂无"}`,
-    `反证：${input.counterEvidence.join("；") || "暂无"}`,
-    "请输出三段，用 JSON 表示：overview、watchlistNote、counterArgument。不要给投资建议，不要添加结构化证据之外的新事实。"
+    `主题: ${input.topic}`,
+    `机会对象: ${input.opportunityTitles.join("、") || "暂无"}`,
+    `结构化证据: ${input.structuredEvidence.join("；") || "暂无"}`,
+    `反证: ${input.counterEvidence.join("；") || "暂无"}`,
+    "请返回 JSON，字段为 overview、watchlistNote、counterArgument。不要给投资建议，不要添加结构化证据之外的新事实。"
   ].join("\n");
 }
 

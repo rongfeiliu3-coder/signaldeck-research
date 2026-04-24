@@ -133,6 +133,8 @@ AI does not override structured scoring and should not introduce unsupported cla
 
 The app works without DeepSeek. If no key is configured, it falls back to mock AI automatically.
 
+DeepSeek is only read through server-side code. Do not prefix the key with `NEXT_PUBLIC_`, and do not use it in client components.
+
 Local setup:
 
 1. Create `.env.local` from `.env.example`.
@@ -157,6 +159,12 @@ Vercel setup:
 8. Redeploy the project.
 
 Never commit real API keys. `.env.example` contains placeholders only.
+
+Test endpoint:
+
+- `GET /api/ai/test`
+
+The endpoint returns whether DeepSeek is configured, which adapter answered, whether mock fallback was used, and a short test summary. It never returns the API key.
 
 ## What is real now
 
