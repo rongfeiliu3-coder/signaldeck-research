@@ -7,6 +7,7 @@ import { ThemeScoreCard } from "@/components/theme-score-card";
 import { getDictionary } from "@/lib/i18n";
 import { getLocale } from "@/lib/locale";
 import { formatRatioPercent, formatScore } from "@/lib/format";
+import { getMarketSessionLabel } from "@/lib/market-session";
 import { getResearchWorkspace } from "@/lib/research/workspace";
 
 function rallyTypeLabel(rallyType: "leader-driven" | "broad-participation" | "mixed") {
@@ -23,6 +24,7 @@ export default async function HomePage() {
   const fiveDayBoard = workspace.marketLeadership.find((board) => board.key === "fiveDay")!;
   const twentyDayBoard = workspace.marketLeadership.find((board) => board.key === "twentyDay")!;
   const leadTheme = todayBoard.themes[0];
+  const sessionLabel = getMarketSessionLabel(workspace.asOfDate);
 
   return (
     <div className="space-y-6">
@@ -44,7 +46,7 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-            <MetricCard label={t.marketLeadership.today} value={leadTheme?.name ?? "-"} detail={leadTheme ? formatScore(leadTheme.leadership.today.heat) : undefined} tone="positive" />
+            <MetricCard label={sessionLabel} value={leadTheme?.name ?? "-"} detail={leadTheme ? formatScore(leadTheme.leadership.today.heat) : undefined} tone="positive" />
             <MetricCard label={t.marketLeadership.fiveDay} value={fiveDayBoard.themes[0]?.name ?? "-"} detail={fiveDayBoard.themes[0] ? formatScore(fiveDayBoard.themes[0].leadership.fiveDay.heat) : undefined} />
             <MetricCard label={t.marketLeadership.twentyDay} value={twentyDayBoard.themes[0]?.name ?? "-"} detail={twentyDayBoard.themes[0] ? formatScore(twentyDayBoard.themes[0].leadership.twentyDay.heat) : undefined} />
             <MetricCard
@@ -108,7 +110,7 @@ export default async function HomePage() {
             <thead>
               <tr>
                 <th>主题</th>
-                <th>{t.marketLeadership.today}</th>
+                <th>{sessionLabel}</th>
                 <th>{t.marketLeadership.fiveDay}</th>
                 <th>{t.marketLeadership.twentyDay}</th>
                 <th>{t.marketLeadership.breadth}</th>
@@ -143,7 +145,7 @@ export default async function HomePage() {
 
       <section className="grid gap-4 xl:grid-cols-2">
         {workspace.themes.slice(0, 4).map((theme) => (
-          <ThemeScoreCard key={theme.slug} theme={theme} locale={locale} />
+          <ThemeScoreCard key={theme.slug} theme={theme} locale={locale} sessionLabel={sessionLabel} />
         ))}
       </section>
 

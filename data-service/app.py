@@ -50,9 +50,11 @@ def _sleep_between_calls() -> None:
 def _safe_float(value: Any, default: float = 0.0) -> float:
   if value is None:
     return default
+  if isinstance(value, bool):
+    return default
   if isinstance(value, str):
     cleaned = value.replace(",", "").replace("%", "").strip()
-    if cleaned in {"", "--", "nan", "None"}:
+    if cleaned in {"", "--", "nan", "None", "False", "false"}:
       return default
     try:
       return float(cleaned)
@@ -215,10 +217,27 @@ def _fetch_financials(symbol: str) -> Dict[str, float]:
   try:
     financial_df = ak.stock_financial_analysis_indicator(symbol=plain_code)
   except Exception:
-    return _empty_financials()
+    financial_df = pd.DataFrame()
 
   if financial_df.empty:
-    return _empty_financials()
+    try:
+      ths_df = ak.stock_financial_abstract_ths(symbol=plain_code)
+    except Exception:
+      return _empty_financials()
+
+    if ths_df.empty:
+      return _empty_financials()
+
+    latest = ths_df.iloc[-1]
+    return {
+      "revenueGrowth": _safe_float(latest.get("营业总收入同比增长率"), 0.0) / 100.0,
+      "netProfitGrowth": _safe_float(latest.get("净利润同比增长率"), 0.0) / 100.0,
+      "roe": _safe_float(_first_existing(latest, ["净资产收益率", "净资产收益率-摊薄"]), 0.0) / 100.0,
+      "grossMargin": _safe_float(latest.get("销售毛利率"), 0.0) / 100.0,
+      "debtRatio": _safe_float(latest.get("资产负债率"), 0.0) / 100.0,
+      "operatingCashFlow": _safe_float(latest.get("每股经营现金流"), 0.0),
+      "dividendYield": 0.0
+    }
 
   latest = financial_df.iloc[0]
   columns = [str(column) for column in financial_df.columns]

@@ -13,10 +13,12 @@ function rallyTypeLabel(theme: ThemeSnapshot) {
 
 export function ThemeScoreCard({
   theme,
-  locale
+  locale,
+  sessionLabel
 }: {
   theme: ThemeSnapshot;
   locale: Locale;
+  sessionLabel?: string;
 }) {
   const t = getDictionary(locale);
   const heatTone = theme.leadership.today.heat >= 70 ? "positive" : theme.leadership.today.heat >= 52 ? "neutral" : "negative";
@@ -38,7 +40,7 @@ export function ThemeScoreCard({
         </Link>
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label={t.marketLeadership.today} value={formatScore(theme.leadership.today.heat)} detail={rallyTypeLabel(theme)} tone={heatTone} />
+        <MetricCard label={sessionLabel ?? t.marketLeadership.today} value={formatScore(theme.leadership.today.heat)} detail={rallyTypeLabel(theme)} tone={heatTone} />
         <MetricCard
           label={t.themeResearch.breadth}
           value={formatRatioPercent(theme.internalBreadth)}

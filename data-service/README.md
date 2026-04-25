@@ -136,6 +136,7 @@ Render Free instances are constrained:
 Bridge safeguards for this tier:
 
 - scans only the configured theme universe, not the full A-share market
+- does not scan optional presets in `config/theme-basket-presets.json`
 - limits the default universe with `AKSHARE_MAX_SYMBOLS=30`
 - uses `AKSHARE_SNAPSHOT_TIMEOUT_SECONDS=75` to avoid long blocking refreshes
 - normal page loads reuse the latest in-memory snapshot
@@ -143,3 +144,9 @@ Bridge safeguards for this tier:
 - if the bridge fails, times out, or sleeps, the Next.js app falls back to mock data
 
 Expect the first request after spin-down to be slower. Use `/health` for uptime checks and `/snapshot/workspace?refresh=1` only when you explicitly want a new Akshare pull.
+
+Financial data behavior:
+
+- price history uses the primary Akshare A-share history endpoint with a fallback daily endpoint
+- fundamentals use Akshare financial indicators with TongHuaShun financial abstracts as fallback
+- missing fundamentals are returned as zero so the frontend can mark low-confidence financial coverage without crashing

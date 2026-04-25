@@ -185,6 +185,20 @@ Render bridge settings:
 
 Render Free constraints are expected: 512 MB RAM, low CPU, and spin-down after inactivity. The bridge is configured to scan only the theme basket universe, cache snapshots in memory, expose a lightweight `/health`, and let the frontend fall back to mock data if the public bridge is slow or unavailable.
 
+Theme research notes:
+
+- Active baskets live in `config/theme-baskets.json`.
+- Optional basket templates live in `config/theme-basket-presets.json`.
+- Presets are shown in the Theme Research page but are not scanned by default, which keeps Render Free from pulling too many Akshare symbols.
+- The Theme Research page ranks the current top 5 active baskets by latest trading-session heat.
+- Weekend and holiday pages display `最近交易日` when the snapshot date is not today's China date.
+
+Fundamentals notes:
+
+- The bridge first tries Akshare's financial analysis endpoint, then falls back to TongHuaShun financial abstracts.
+- If all financial fields are unavailable, the quality score is shown as `0/100` instead of a misleading low fixed score.
+- Dividend yield is still best-effort and may remain unavailable for some symbols.
+
 Once Render is deployed, set Vercel to:
 
 ```env

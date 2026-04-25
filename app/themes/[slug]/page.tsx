@@ -6,6 +6,7 @@ import { getDictionary } from "@/lib/i18n";
 import { getLocale } from "@/lib/locale";
 import { getResearchWorkspace } from "@/lib/research/workspace";
 import { formatRatioPercent, formatScore } from "@/lib/format";
+import { getMarketSessionLabel } from "@/lib/market-session";
 
 function rallyTypeLabel(rallyType: "leader-driven" | "broad-participation" | "mixed") {
   if (rallyType === "leader-driven") return "龙头驱动";
@@ -36,6 +37,7 @@ export default async function ThemeDetailPage({
   const { slug } = await params;
   const workspace = await getResearchWorkspace();
   const theme = workspace.themes.find((item) => item.slug === slug);
+  const sessionLabel = getMarketSessionLabel(workspace.asOfDate);
 
   if (!theme) {
     return <div className="empty-state">{t.notFound.body}</div>;
@@ -68,7 +70,7 @@ export default async function ThemeDetailPage({
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="surface p-5">
-          <p className="text-xs text-slate-500">{t.marketLeadership.today}</p>
+          <p className="text-xs text-slate-500">{sessionLabel}</p>
           <p className="mt-2 text-3xl font-semibold text-white">{formatScore(theme.leadership.today.heat)}</p>
           <p className="mt-2 text-sm text-slate-400">{rallyTypeLabel(theme.leadership.today.rallyType)}</p>
         </div>
@@ -116,7 +118,7 @@ export default async function ThemeDetailPage({
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-4">
                   <div>
-                    <p className="text-xs text-slate-500">{t.marketLeadership.today}</p>
+                    <p className="text-xs text-slate-500">{sessionLabel}</p>
                     <p className="mt-1 font-semibold text-white">{formatRatioPercent(stock.return1d)}</p>
                   </div>
                   <div>

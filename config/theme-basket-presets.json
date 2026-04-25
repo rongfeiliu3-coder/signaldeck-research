@@ -1,0 +1,42 @@
+[
+  {
+    "slug": "humanoid-robotics",
+    "nameZh": "机器人 / 具身智能",
+    "nameEn": "Robotics & Embodied AI",
+    "descriptionZh": "机器人本体、减速器、传感器、运动控制与自动化设备链。",
+    "focus": "观察产业催化、订单验证、题材热度与核心零部件扩散。",
+    "symbols": ["300124.SZ", "002472.SZ", "688017.SH", "002747.SZ", "300024.SZ"]
+  },
+  {
+    "slug": "semiconductor-localization",
+    "nameZh": "半导体国产化",
+    "nameEn": "Semiconductor Localization",
+    "descriptionZh": "设备、材料、设计与先进封装相关 A 股研究篮子。",
+    "focus": "观察国产替代、订单兑现、景气周期与估值消化。",
+    "symbols": ["688012.SH", "688981.SH", "002371.SZ", "603986.SH", "688041.SH"]
+  },
+  {
+    "slug": "brokerage-capital-market",
+    "nameZh": "券商 / 资本市场",
+    "nameEn": "Brokerage & Capital Market",
+    "descriptionZh": "券商、财富管理与资本市场活跃度相关方向。",
+    "focus": "观察成交额、政策预期、beta 弹性与市场风险偏好。",
+    "symbols": ["600030.SH", "601688.SH", "600837.SH", "000776.SZ", "601211.SH"]
+  },
+  {
+    "slug": "innovative-drug",
+    "nameZh": "创新药",
+    "nameEn": "Innovative Drug",
+    "descriptionZh": "创新药、CXO、生物科技与医药研发链。",
+    "focus": "观察临床进展、出海授权、估值修复与政策边际变化。",
+    "symbols": ["600276.SH", "300760.SZ", "603259.SH", "688235.SH", "300015.SZ"]
+  },
+  {
+    "slug": "consumer-recovery",
+    "nameZh": "消费复苏",
+    "nameEn": "Consumer Recovery",
+    "descriptionZh": "白酒、免税、家电、食品饮料与可选消费链。",
+    "focus": "观察收入预期、库存周期、价格带变化与资金防御偏好。",
+    "symbols": ["600519.SH", "000858.SZ", "601888.SH", "000333.SZ", "600887.SH"]
+  }
+]

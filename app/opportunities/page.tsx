@@ -7,6 +7,7 @@ import {
 } from "@/components/opportunity-card";
 import { getDictionary } from "@/lib/i18n";
 import { getLocale } from "@/lib/locale";
+import { getMarketSessionLabel } from "@/lib/market-session";
 import { buildOpportunityDiagnostic } from "@/lib/research/opportunities";
 import { getResearchWorkspace } from "@/lib/research/workspace";
 import { OpportunityAssetType, OpportunityItem, OpportunityRisk, OpportunityStyle } from "@/lib/types";
@@ -159,6 +160,7 @@ export default async function OpportunitiesPage({
   const opportunities = filterAndSortOpportunities(workspace.opportunityLab.opportunities, params);
   const diagnostic = buildOpportunityDiagnostic(workspace, query);
   const todayList = opportunities.slice(0, 6);
+  const sessionLabel = getMarketSessionLabel(workspace.asOfDate);
 
   return (
     <div className="space-y-6">
@@ -264,7 +266,7 @@ export default async function OpportunitiesPage({
       <section className="surface p-5">
         <div className="flex items-center gap-2 text-cyan">
           <Target className="h-4 w-4" />
-          <h2 className="text-base font-semibold text-white">今日机会列表</h2>
+          <h2 className="text-base font-semibold text-white">{sessionLabel}机会列表</h2>
         </div>
         <div className="mt-4 grid gap-4 xl:grid-cols-2">
           {todayList.map((item) => (

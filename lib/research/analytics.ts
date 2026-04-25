@@ -57,6 +57,20 @@ function toPercentText(value: number, digits = 0) {
 function buildFundamentalBreakdown(security: SecurityRecord): FundamentalsBreakdown {
   const thresholds = scoringConfig.thresholds;
   const weights = scoringConfig.weights;
+  const values = Object.values(security.fundamentals);
+
+  if (values.every((value) => value === 0)) {
+    return {
+      totalScore: 0,
+      components: Object.entries(weights).map(([key, weight]) => ({
+        key: key as keyof SecurityRecord["fundamentals"],
+        label: key,
+        rawValue: 0,
+        weight,
+        score: 0
+      }))
+    };
+  }
 
   const components: ScoreComponent[] = [
     {
