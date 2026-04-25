@@ -9,6 +9,14 @@ function authHeaders() {
   return process.env.AKSHARE_API_KEY ? { Authorization: `Bearer ${process.env.AKSHARE_API_KEY}` } : undefined;
 }
 
+function requestTimeoutMs() {
+  return Number(process.env.AKSHARE_REQUEST_TIMEOUT_MS ?? 8000);
+}
+
+function healthTimeoutMs() {
+  return Number(process.env.AKSHARE_HEALTH_TIMEOUT_MS ?? 3000);
+}
+
 export class AkshareAdapter implements AShareDataAdapter {
   readonly id = "akshare" as const;
   readonly label = "Akshare Live";
@@ -30,7 +38,7 @@ export class AkshareAdapter implements AShareDataAdapter {
     const response = await fetch(joinUrl(this.baseUrl, "/snapshot/workspace"), {
       headers: authHeaders(),
       cache: "no-store",
-      signal: AbortSignal.timeout(120000)
+      signal: AbortSignal.timeout(requestTimeoutMs())
     });
 
     if (!response.ok) {
@@ -51,7 +59,7 @@ export class AkshareAdapter implements AShareDataAdapter {
     const response = await fetch(joinUrl(this.baseUrl, "/health"), {
       headers: authHeaders(),
       cache: "no-store",
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(healthTimeoutMs())
     });
 
     if (!response.ok) {

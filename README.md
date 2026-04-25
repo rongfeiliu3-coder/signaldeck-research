@@ -185,6 +185,32 @@ Render bridge settings:
 
 Render Free constraints are expected: 512 MB RAM, low CPU, and spin-down after inactivity. The bridge is configured to scan only the theme basket universe, cache snapshots in memory, expose a lightweight `/health`, and let the frontend fall back to mock data if the public bridge is slow or unavailable.
 
+Cloud speed recommendation:
+
+- Vercel should use a short bridge timeout, for example `AKSHARE_REQUEST_TIMEOUT_MS=8000`.
+- If Render Free is asleep or slow, the app will show `Mock Fallback` quickly instead of spinning for minutes.
+- For real-data research, the fastest path is local: run the Akshare bridge on your computer and open the local Next.js app.
+
+Local real-data workflow:
+
+```powershell
+cd C:\quantize\data-service
+.\.venv\Scripts\python.exe app.py
+```
+
+In a second terminal:
+
+```powershell
+cd C:\quantize
+npm run dev -- -p 3001
+```
+
+Open:
+
+```txt
+http://127.0.0.1:3001
+```
+
 Theme research notes:
 
 - Active baskets live in `config/theme-baskets.json`.
