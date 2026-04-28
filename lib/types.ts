@@ -256,6 +256,25 @@ export type StrategyCandidate = {
   name: string;
   reason: string;
   score: number;
+  assetType?: "stock" | "theme" | "fund";
+  entryScore?: number;
+  entryStage?: string;
+  entryAction?: string;
+  positionPlan?: string[];
+  triggerSignals?: string[];
+  waitForSignals?: string[];
+  invalidationSignals?: string[];
+  riskNotes?: string[];
+  evidence?: string[];
+  counterEvidence?: string[];
+  metrics?: {
+    momentum?: number;
+    quality?: number;
+    breadth?: number;
+    turnoverActivity?: number;
+    dividendDefensive?: number;
+    riskControl?: number;
+  };
 };
 
 export type StrategyModule = {
@@ -272,6 +291,26 @@ export type StrategyModule = {
   whySelectedEn: string;
   invalidationZh: string;
   invalidationEn: string;
+  timingFramework?: {
+    entryRule: string;
+    addRule: string;
+    reduceRule: string;
+    avoidRule: string;
+  };
+  backtest?: {
+    sampleSize: number;
+    windowDays: number;
+    cumulativeReturn: number;
+    annualizedReturnProxy: number;
+    maxDrawdown: number;
+    hitRate: number;
+    averageReturn: number;
+    volatility: number;
+    bestPeriod: number;
+    worstPeriod: number;
+    evidence: string[];
+    limitations: string[];
+  };
 };
 
 export type RawResearchData = {
