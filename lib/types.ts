@@ -243,6 +243,37 @@ export type MarketLeadershipBoard = {
   themes: ThemeSnapshot[];
 };
 
+export type StrategyId = 
+  | "high-dividend" 
+  | "theme-rotation" 
+  | "low-level-reversal" 
+  | "short-term-sentiment" 
+  | "fundamental-quality" 
+  | "fund-exposure";
+
+export type StrategyCandidate = {
+  symbol: string;
+  name: string;
+  reason: string;
+  score: number;
+};
+
+export type StrategyModule = {
+  id: StrategyId;
+  nameZh: string;
+  nameEn: string;
+  horizonZh: string;
+  horizonEn: string;
+  riskZh: string;
+  riskEn: string;
+  scoringDimensions: string[];
+  candidates: StrategyCandidate[];
+  whySelectedZh: string;
+  whySelectedEn: string;
+  invalidationZh: string;
+  invalidationEn: string;
+};
+
 export type RawResearchData = {
   asOfDate: string;
   universeName: string;
@@ -268,6 +299,7 @@ export type MarketWorkspace = {
     stocks: SecurityRecord[];
   };
   funds: FundDiagnostic[];
+  strategies: StrategyModule[];
   marketSummary: RationalSummary;
   opportunityLab: OpportunityLab;
 };

@@ -7,11 +7,35 @@ const dictionaries = {
   en: {
     nav: {
       market: "Market Leadership",
+      strategies: "Strategies",
       opportunities: "Opportunity Lab",
       themes: "Theme Research",
       fundamentals: "Fundamentals",
       funds: "Fund Diagnostics",
       subtitle: "A-share research workspace"
+    },
+    strategies: {
+      eyebrow: "Practical screening",
+      title: "Strategy Library",
+      description: "Screen for candidates using multi-factor rules. These strategies focus on quality, rotation, and sentiment.",
+      highDividend: "High Dividend Defensive",
+      themeRotation: "Theme Rotation",
+      lowLevelReversal: "Bottom Reversal",
+      shortTermSentiment: "Short-term Sentiment",
+      fundamentalQuality: "Fundamental Quality",
+      fundExposure: "Fund Exposure",
+      suitableHorizon: "Horizon",
+      riskLevel: "Risk",
+      scoring: "Scoring",
+      candidates: "Top Candidates",
+      whySelected: "Rationale",
+      invalidation: "Invalidation",
+      shortTerm: "Short-term",
+      mediumTerm: "Medium-term",
+      longTerm: "Long-term",
+      lowRisk: "Low",
+      mediumRisk: "Medium",
+      highRisk: "High"
     },
     footer: {
       disclaimer: "Research support only. Not a live trading or investment-advice product.",
@@ -137,11 +161,35 @@ const dictionaries = {
   zh: {
     nav: {
       market: "市场主线",
+      strategies: "策略库",
       opportunities: "机会分析",
       themes: "主题研究",
       fundamentals: "基本面看板",
       funds: "基金透视",
       subtitle: "A股研究工作台"
+    },
+    strategies: {
+      eyebrow: "实战策略库",
+      title: "策略库",
+      description: "基于多维因子的筛选模式。涵盖高股息、主题轮动、低位修复等实战策略。",
+      highDividend: "高股息防御",
+      themeRotation: "主题轮动",
+      lowLevelReversal: "低位修复",
+      shortTermSentiment: "短线情绪",
+      fundamentalQuality: "基本面质量",
+      fundExposure: "基金暴露诊断",
+      suitableHorizon: "适用周期",
+      riskLevel: "风险等级",
+      scoring: "评分维度",
+      candidates: "优选对象",
+      whySelected: "入选原因",
+      invalidation: "失效条件",
+      shortTerm: "短线",
+      mediumTerm: "中线",
+      longTerm: "长线",
+      lowRisk: "低风险",
+      mediumRisk: "中风险",
+      highRisk: "高风险"
     },
     footer: {
       disclaimer: "仅用于研究支持，不用于实盘交易，也不构成投资建议。",

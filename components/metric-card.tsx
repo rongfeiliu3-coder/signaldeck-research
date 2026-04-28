@@ -5,7 +5,7 @@ type Tone = "positive" | "negative" | "neutral";
 const toneClass: Record<Tone, string> = {
   positive: "text-mint",
   negative: "text-rose",
-  neutral: "text-slate-100"
+  neutral: "text-white"
 };
 
 export function MetricCard({
@@ -20,10 +20,12 @@ export function MetricCard({
   tone?: Tone;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.035] p-4">
-      <p className="text-xs font-medium uppercase tracking-normal text-slate-500">{label}</p>
-      <p className={cn("mt-2 text-2xl font-semibold tracking-normal", toneClass[tone])}>{value}</p>
-      {detail ? <p className="mt-1 text-sm text-slate-400">{detail}</p> : null}
+    <div className="surface-muted p-3.5">
+      <p className="metric-label">{label}</p>
+      <div className="mt-1.5 flex items-baseline gap-2">
+        <p className={cn("metric-value", toneClass[tone])}>{value}</p>
+      </div>
+      {detail ? <p className="mt-0.5 text-[11px] font-medium text-slate-500">{detail}</p> : null}
     </div>
   );
 }

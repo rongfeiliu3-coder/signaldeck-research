@@ -1,17 +1,17 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ShieldCheck, Zap, Activity, Info } from "lucide-react";
 import { OpportunityItem } from "@/lib/types";
 
 export function opportunityCategoryLabel(category: OpportunityItem["category"]) {
   switch (category) {
     case "long-term":
-      return "长线观察机会";
+      return "长线观察";
     case "medium-term":
-      return "中线趋势机会";
+      return "中线趋势";
     case "short-term":
-      return "短线交易机会";
+      return "短线博弈";
     default:
-      return "高风险题材机会";
+      return "高风险题材";
   }
 }
 
@@ -20,7 +20,7 @@ export function opportunityAssetLabel(assetType: OpportunityItem["assetType"]) {
     case "stock":
       return "股票";
     case "fund":
-      return "基金篮子";
+      return "基金";
     case "theme":
       return "主题";
     default:
@@ -31,7 +31,7 @@ export function opportunityAssetLabel(assetType: OpportunityItem["assetType"]) {
 export function opportunityDriverLabel(driver: OpportunityItem["driver"]) {
   switch (driver) {
     case "fundamentals-driven":
-      return "基本面驱动";
+      return "基本面支撑";
     case "sentiment-driven":
       return "情绪驱动";
     case "policy-driven":
@@ -69,75 +69,74 @@ function resolveHref(item: OpportunityItem) {
 
 export function OpportunityCard({ item }: { item: OpportunityItem }) {
   return (
-    <article className="surface p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full border border-cyan/20 bg-cyan/10 px-2.5 py-1 text-[11px] text-cyan">{opportunityCategoryLabel(item.category)}</span>
-            <span className="rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-slate-400">{opportunityAssetLabel(item.assetType)}</span>
-            <span className={`rounded-full border border-white/10 px-2.5 py-1 text-[11px] ${riskTone(item.riskLevel)}`}>{opportunityRiskLabel(item.riskLevel)}</span>
+    <article className="surface group relative flex flex-col overflow-hidden transition-all hover:border-white/20">
+      <div className="flex flex-1 flex-col p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap gap-1.5">
+              <span className="rounded bg-white/[0.03] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                {opportunityAssetLabel(item.assetType)}
+              </span>
+              <span className={`rounded bg-white/[0.03] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${riskTone(item.riskLevel)}`}>
+                {opportunityRiskLabel(item.riskLevel)}
+              </span>
+            </div>
+            <h3 className="text-lg font-bold tracking-tight text-white group-hover:text-cyan">
+              {item.title}
+              <span className="ml-2 text-xs font-normal text-slate-500">{item.assetRef}</span>
+            </h3>
           </div>
+          <Link
+            href={resolveHref(item)}
+            className="focus-ring flex h-8 w-8 items-center justify-center rounded border border-white/10 text-slate-500 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded border border-white/[0.05] bg-white/[0.02] p-2">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <ShieldCheck className="h-3 w-3 text-mint" />
+              长线分
+            </div>
+            <p className="mt-1 font-number text-xl font-bold text-mint">{item.scoreBreakdown.longTerm.toFixed(1)}</p>
+          </div>
+          <div className="rounded border border-white/[0.05] bg-white/[0.02] p-2">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <Zap className="h-3 w-3 text-amber" />
+              短线分
+            </div>
+            <p className="mt-1 font-number text-xl font-bold text-amber">{item.scoreBreakdown.shortTerm.toFixed(1)}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-3">
           <div>
-            <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-            <p className="mt-1 text-sm text-slate-400">{item.assetRef} · {opportunityDriverLabel(item.driver)}</p>
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <Activity className="h-3 w-3" />
+              主驱动力
+            </div>
+            <p className="mt-1 text-sm font-medium text-slate-200">
+              {opportunityDriverLabel(item.driver)} · <span className="text-slate-400 font-normal">{item.whyNow}</span>
+            </p>
+          </div>
+          
+          <div>
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <Info className="h-3 w-3" />
+              失效条件
+            </div>
+            <p className="mt-1 text-xs text-slate-400 line-clamp-2">
+              {item.thesisInvalidation[0] || "未设定具体失效条件"}
+            </p>
           </div>
         </div>
-        <Link
-          href={resolveHref(item)}
-          className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-slate-400 hover:bg-white/5 hover:text-white"
-          aria-label={`Open ${item.title}`}
-        >
-          <ArrowUpRight className="h-4 w-4" />
-        </Link>
       </div>
-
-      <p className="mt-4 text-sm leading-6 text-slate-300">{item.whyNow}</p>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <p className="text-[11px] text-slate-500">综合机会分</p>
-          <p className="mt-2 text-2xl font-semibold text-white">{item.scoreBreakdown.composite.toFixed(1)}</p>
-          <p className="mt-1 text-xs text-slate-400">{item.confidence.toUpperCase()} CONF</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <p className="text-[11px] text-slate-500">长线跟踪分</p>
-          <p className="mt-2 text-2xl font-semibold text-mint">{item.scoreBreakdown.longTerm.toFixed(1)}</p>
-          <p className="mt-1 text-xs text-slate-400">质量/防御优先</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <p className="text-[11px] text-slate-500">短线交易分</p>
-          <p className="mt-2 text-2xl font-semibold text-amber">{item.scoreBreakdown.shortTerm.toFixed(1)}</p>
-          <p className="mt-1 text-xs text-slate-400">强度/活跃优先</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <p className="text-[11px] text-slate-500">市场强度</p>
-          <p className="mt-2 text-2xl font-semibold text-white">{item.scoreBreakdown.marketStrength.toFixed(0)}</p>
-          <p className="mt-1 text-xs text-slate-400">广度 {item.scoreBreakdown.breadthParticipation.toFixed(0)}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <p className="text-[11px] text-slate-500">质量 / 防御</p>
-          <p className="mt-2 text-2xl font-semibold text-white">{item.scoreBreakdown.fundamentalQuality.toFixed(0)}</p>
-          <p className="mt-1 text-xs text-slate-400">防御 {item.scoreBreakdown.defensiveness.toFixed(0)}</p>
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-sm font-medium text-white">支持证据</p>
-          <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-300">
-            {item.supportingEvidence.map((evidence) => (
-              <li key={evidence}>{evidence}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-sm font-medium text-white">反证与失效条件</p>
-          <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-300">
-            {[...item.counterEvidence, ...item.thesisInvalidation].slice(0, 4).map((evidence) => (
-              <li key={evidence}>{evidence}</li>
-            ))}
-          </ul>
-        </div>
+      
+      <div className="flex items-center justify-between border-t border-white/[0.05] bg-white/[0.01] px-4 py-2">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{opportunityCategoryLabel(item.category)}</span>
+        <span className="font-number text-[10px] font-bold text-slate-400">{item.confidence.toUpperCase()} CONF</span>
       </div>
     </article>
   );

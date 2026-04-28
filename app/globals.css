@@ -11,6 +11,7 @@
   --panel: rgba(10, 14, 20, 0.92);
   --panel-strong: rgba(12, 17, 24, 0.96);
   --panel-border: rgba(255, 255, 255, 0.08);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 * {
@@ -32,7 +33,7 @@ body {
   text-rendering: optimizeLegibility;
   background:
     linear-gradient(180deg, rgba(7, 10, 14, 0.98), rgba(5, 7, 10, 1) 24rem),
-    radial-gradient(circle at top right, rgba(26, 36, 48, 0.28), transparent 28rem),
+    radial-gradient(circle at top right, rgba(26, 36, 48, 0.2), transparent 28rem),
     var(--background);
   color: var(--foreground);
 }
@@ -43,10 +44,15 @@ body::before {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 96px 96px;
-  mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 65%);
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 65%);
+}
+
+.font-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 a {
@@ -63,11 +69,8 @@ a {
 }
 
 @layer base {
-  h1,
-  h2,
-  h3,
-  h4 {
-    letter-spacing: 0;
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
   }
 }
 
@@ -77,50 +80,67 @@ a {
   }
 
   .surface {
-    @apply rounded-xl border border-white/10 bg-[rgba(10,14,20,0.92)] shadow-[0_8px_22px_rgba(0,0,0,0.24)];
+    @apply rounded-lg border border-white/10 bg-[rgba(10,14,20,0.85)] backdrop-blur-md shadow-lg transition-all duration-200;
   }
 
   .surface-strong {
-    @apply rounded-xl border border-white/10 bg-[rgba(12,17,24,0.96)] shadow-[0_10px_28px_rgba(0,0,0,0.28)];
+    @apply rounded-lg border border-white/15 bg-[rgba(12,17,24,0.96)] shadow-xl;
   }
 
   .surface-muted {
-    @apply rounded-xl border border-white/10 bg-white/[0.02];
+    @apply rounded-lg border border-white/5 bg-white/[0.01];
   }
 
   .section-heading {
-    @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500;
+    @apply text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500;
   }
 
   .page-title {
-    @apply text-3xl font-semibold text-white sm:text-4xl;
+    @apply text-2xl font-bold text-white sm:text-3xl tracking-tight;
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.16em];
+    @apply inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.15em];
   }
 
   .empty-state {
-    @apply flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 text-center text-sm text-slate-500;
+    @apply flex min-h-[180px] items-center justify-center rounded-lg border border-dashed border-white/10 bg-white/[0.01] px-6 text-center text-xs text-slate-500;
+  }
+
+  .terminal-table {
+    @apply w-full border-collapse;
   }
 
   .terminal-table thead {
-    @apply bg-white/[0.02] text-[11px] uppercase tracking-[0.14em] text-slate-500;
+    @apply bg-white/[0.03] text-[10px] uppercase tracking-[0.15em] text-slate-500 border-b border-white/10;
   }
 
   .terminal-table th {
-    @apply px-5 py-3 font-medium;
+    @apply px-4 py-2 font-semibold;
   }
 
   .terminal-table td {
-    @apply px-5 py-3.5 text-slate-200;
+    @apply px-4 py-2 text-slate-300 font-number border-b border-white/[0.03];
   }
 
   .terminal-table tbody tr {
-    @apply border-t border-white/5 align-top;
+    @apply transition-colors duration-150;
   }
 
   .terminal-table tbody tr:hover {
-    @apply bg-white/[0.02];
+    @apply bg-white/[0.04] text-white;
+  }
+
+  .terminal-table tbody tr:hover td {
+    @apply text-white;
+  }
+
+  /* Metric values should stand out */
+  .metric-value {
+    @apply text-2xl font-bold tracking-tight text-white font-number;
+  }
+
+  .metric-label {
+    @apply text-[10px] font-bold uppercase tracking-wider text-slate-500;
   }
 }

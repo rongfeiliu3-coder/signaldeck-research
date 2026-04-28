@@ -21,55 +21,57 @@ export default async function FundsPage() {
         <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">{t.funds.description}</p>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-3">
+      <section className="grid gap-6 xl:grid-cols-3">
         {workspace.funds.map((fund) => (
-          <article key={fund.slug} className="surface p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold text-white">{fund.name}</h2>
-                <p className="mt-2 text-sm text-slate-400">{fund.description}</p>
+          <article key={fund.slug} className="surface flex flex-col overflow-hidden shadow-2xl transition-all hover:border-white/20">
+            <div className="flex-1 p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-white group-hover:text-cyan">{fund.name}</h2>
+                  <p className="mt-1 text-xs text-slate-500 line-clamp-2">{fund.description}</p>
+                </div>
+                <span className="rounded bg-white/[0.03] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{fund.style}</span>
               </div>
-              <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-400">{fund.style}</span>
-            </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-xs text-slate-500">{t.funds.topSector}</p>
-                <p className="mt-2 text-lg font-semibold text-white">{fund.topSector}</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-xs text-slate-500">{t.funds.themeOverlap}</p>
-                <p className="mt-2 text-lg font-semibold text-white">{formatRatioPercent(fund.trackedThemeOverlap.reduce((sum, item) => sum + item.weight, 0))}</p>
-              </div>
-            </div>
-            <div className="mt-4 space-y-3">
-              <div>
-                <p className="text-sm text-slate-500">{t.funds.themeExposure}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {fund.themeExposure.slice(0, 4).map((item) => (
-                    <span key={item.slug} className="rounded-full border border-cyan/25 bg-cyan/10 px-3 py-1 text-xs text-cyan">
-                      {item.name} {formatRatioPercent(item.weight)}
-                    </span>
-                  ))}
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="surface-muted p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.funds.topSector}</p>
+                  <p className="mt-1.5 font-bold text-white">{fund.topSector}</p>
+                </div>
+                <div className="surface-muted p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.funds.themeOverlap}</p>
+                  <p className="mt-1.5 font-number font-bold text-cyan">{formatRatioPercent(fund.trackedThemeOverlap.reduce((sum, item) => sum + item.weight, 0))}</p>
                 </div>
               </div>
-              <div>
-                <p className="text-sm text-slate-500">{t.funds.styleExposure}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {fund.styleExposure.slice(0, 4).map((item) => (
-                    <span key={item.name} className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
-                      {item.name} {formatRatioPercent(item.weight)}
-                    </span>
-                  ))}
+              <div className="mt-5 space-y-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.funds.themeExposure}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {fund.themeExposure.slice(0, 4).map((item) => (
+                      <span key={item.slug} className="rounded border border-cyan/20 bg-cyan/5 px-2 py-0.5 text-[10px] font-bold text-cyan">
+                        {item.name} {formatRatioPercent(item.weight)}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs text-slate-500">{t.funds.qualityScore}</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{formatScore(fund.averageQualityScore)}</p>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.funds.styleExposure}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {fund.styleExposure.slice(0, 4).map((item) => (
+                      <span key={item.name} className="rounded border border-white/10 bg-white/[0.02] px-2 py-0.5 text-[10px] font-bold text-slate-400">
+                        {item.name} {formatRatioPercent(item.weight)}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs text-slate-500">{t.funds.momentumScore}</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{formatScore(fund.averageMomentumScore)}</p>
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="surface-muted p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.funds.qualityScore}</p>
+                    <p className="mt-1.5 font-number text-xl font-bold text-mint">{formatScore(fund.averageQualityScore)}</p>
+                  </div>
+                  <div className="surface-muted p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.funds.momentumScore}</p>
+                    <p className="mt-1.5 font-number text-xl font-bold text-amber">{formatScore(fund.averageMomentumScore)}</p>
+                  </div>
                 </div>
               </div>
             </div>

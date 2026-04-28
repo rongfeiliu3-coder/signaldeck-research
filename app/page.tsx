@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Activity, Database, ShieldAlert } from "lucide-react";
+import { Activity, Database, ShieldAlert, ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { MetricCard } from "@/components/metric-card";
 import { RefreshButton } from "@/components/refresh-button";
 import { SummaryCard } from "@/components/summary-card";
@@ -95,47 +96,59 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="surface overflow-hidden">
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+      <section className="surface overflow-hidden shadow-2xl">
+        <div className="flex items-center justify-between border-b border-white/[0.08] bg-white/[0.02] px-5 py-3">
           <div>
-            <h2 className="text-base font-semibold text-white">{t.marketLeadership.boardTitle}</h2>
-            <p className="mt-1 text-sm text-slate-500">{t.marketLeadership.boardBody}</p>
+            <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-white">{t.marketLeadership.boardTitle}</h2>
+            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.marketLeadership.boardBody}</p>
           </div>
-          <Link href="/themes" className="focus-ring rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 hover:bg-white/[0.04] hover:text-white">
+          <Link href="/themes" className="focus-ring flex items-center gap-1.5 rounded border border-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 transition-colors hover:bg-white/10 hover:text-white">
             {t.nav.themes}
+            <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="terminal-table w-full min-w-[1180px] text-left text-sm">
+          <table className="terminal-table w-full min-w-[1100px] text-left">
             <thead>
               <tr>
-                <th>主题</th>
-                <th>{sessionLabel}</th>
-                <th>{t.marketLeadership.fiveDay}</th>
-                <th>{t.marketLeadership.twentyDay}</th>
-                <th>{t.marketLeadership.breadth}</th>
-                <th>{t.marketLeadership.turnover}</th>
-                <th>{t.marketLeadership.concentration}</th>
-                <th>{t.marketLeadership.rallyType}</th>
-                <th>叙事标签</th>
+                <th className="w-[180px]">主题名称</th>
+                <th className="text-right">{sessionLabel}</th>
+                <th className="text-right">{t.marketLeadership.fiveDay}</th>
+                <th className="text-right">{t.marketLeadership.twentyDay}</th>
+                <th className="text-right">{t.marketLeadership.breadth}</th>
+                <th className="text-right">{t.marketLeadership.turnover}</th>
+                <th className="text-right">{t.marketLeadership.concentration}</th>
+                <th className="text-center">{t.marketLeadership.rallyType}</th>
+                <th className="pl-8">核心叙事逻辑</th>
               </tr>
             </thead>
             <tbody>
               {todayBoard.themes.map((theme) => (
-                <tr key={theme.slug}>
-                  <td>
-                    <Link href={`/themes/${theme.slug}`} className="font-medium text-white hover:text-cyan">
+                <tr key={theme.slug} className="group">
+                  <td className="!font-sans font-bold text-white group-hover:text-cyan">
+                    <Link href={`/themes/${theme.slug}`} className="block">
                       {theme.name}
                     </Link>
                   </td>
-                  <td>{formatScore(theme.leadership.today.heat)}</td>
-                  <td>{formatScore(theme.leadership.fiveDay.heat)}</td>
-                  <td>{formatScore(theme.leadership.twentyDay.heat)}</td>
-                  <td>{formatRatioPercent(theme.leadership.today.breadth)}</td>
-                  <td>{formatRatioPercent(theme.avgTurnoverDelta)}</td>
-                  <td>{formatRatioPercent(theme.leadership.today.topFiveContribution)}</td>
-                  <td>{rallyTypeLabel(theme.leadership.today.rallyType)}</td>
-                  <td>{theme.summary.marketNarrative.split("，")[0]}</td>
+                  <td className="text-right font-bold text-cyan">{formatScore(theme.leadership.today.heat)}</td>
+                  <td className="text-right">{formatScore(theme.leadership.fiveDay.heat)}</td>
+                  <td className="text-right">{formatScore(theme.leadership.twentyDay.heat)}</td>
+                  <td className="text-right">{formatRatioPercent(theme.leadership.today.breadth)}</td>
+                  <td className="text-right">{formatRatioPercent(theme.avgTurnoverDelta)}</td>
+                  <td className="text-right">{formatRatioPercent(theme.leadership.today.topFiveContribution)}</td>
+                  <td className="text-center">
+                    <span className={cn(
+                      "inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                      theme.leadership.today.rallyType === "broad-participation" ? "bg-mint/10 text-mint border border-mint/20" : 
+                      theme.leadership.today.rallyType === "leader-driven" ? "bg-amber/10 text-amber border border-amber/20" : 
+                      "bg-white/5 text-slate-400 border border-white/10"
+                    )}>
+                      {rallyTypeLabel(theme.leadership.today.rallyType)}
+                    </span>
+                  </td>
+                  <td className="!font-sans pl-8 text-xs text-slate-400 line-clamp-1 group-hover:text-slate-300">
+                    {theme.summary.marketNarrative}
+                  </td>
                 </tr>
               ))}
             </tbody>

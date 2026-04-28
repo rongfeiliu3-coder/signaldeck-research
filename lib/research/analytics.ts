@@ -1,4 +1,5 @@
 import scoringConfig from "@/config/fundamental-scoring.json";
+import { buildStrategies } from "@/lib/research/strategies";
 import {
   EvidenceItem,
   FundDiagnostic,
@@ -382,6 +383,9 @@ function buildThemeSnapshot(basket: RawResearchData["themeBaskets"][number], mem
 }
 
 export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
+  console.log(`[Workspace] Building workspace for date: ${raw.asOfDate}, universe: ${raw.universeName}`);
+  console.log(`[Workspace] Raw securities count: ${raw.securities.length}`);
+  
   const basketMap = new Map(raw.themeBaskets.map((basket) => [basket.slug, basket]));
   const securities: EnrichedSecurity[] = raw.securities.map((security) => {
     const fundamentalsBreakdown = buildFundamentalBreakdown(security);
@@ -392,6 +396,8 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
       fundamentalsBreakdown
     };
   });
+
+  console.log(`[Workspace] Enriched securities sample: ${securities[0].name} qualityScore=${securities[0].qualityScore}`);
 
   const themes = raw.themeBaskets.map((basket) => {
     const members = securities.filter((security) => basket.symbols.includes(security.symbol));
@@ -409,9 +415,15 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
       const security = securities.find((item) => item.symbol === holding.symbol);
       if (security) {
         accumulator.push({ security, weight: holding.weight });
+      } else {
+        console.warn(`[Workspace] Security not found for fund holding: ${holding.symbol} in fund ${fund.name}`);
       }
       return accumulator;
     }, []);
+
+    if (holdings.length === 0) {
+      console.error(`[Workspace] Fund ${fund.name} has no valid holdings!`);
+    }
 
     const sectorExposure = Object.entries(
       holdings.reduce<Record<string, number>>((accumulator, holding) => {
@@ -483,10 +495,10 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
     return accumulator;
   }, {});
   const leadingNarrative =
-    (Object.entries(narrativeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] as ThemeSnapshot["diagnostics"]["narrativeType"] | undefined) ??
+    (Object.entries(narrativeCounts).sort((a: [string, number], b: [string, number]) => b[1] - a[1])[0]?.[0] as ThemeSnapshot["diagnostics"]["narrativeType"] | undefined) ??
     "mixed";
 
-  return {
+  const workspace: MarketWorkspace = {
     asOfDate: raw.asOfDate,
     universeName: raw.universeName,
     providerStatus: {
@@ -503,6 +515,7 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
       stocks: [...securities].sort((a, b) => b.qualityScore - a.qualityScore)
     },
     funds,
+    strategies: [],
     opportunityLab: {
       opportunities: [],
       byCategory: {
@@ -540,4 +553,7 @@ export function buildWorkspace(raw: RawResearchData): MarketWorkspace {
       sources: ["marketData", "financialData", "themeRules", "aiSynthesis"]
     }
   };
+
+  workspace.strategies = buildStrategies(workspace);
+  return workspace;
 }

@@ -33,61 +33,61 @@ export default async function FundamentalsPage() {
         </div>
       </section>
 
-      <section className="surface p-5">
+      <section className="surface p-5 shadow-2xl">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-semibold text-white">{t.fundamentals.methodTitle}</h2>
-            <p className="mt-2 text-sm text-slate-400">{t.fundamentals.methodBody}</p>
+            <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-white">{t.fundamentals.methodTitle}</h2>
+            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.fundamentals.methodBody}</p>
           </div>
-          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-400">`config/fundamental-scoring.json`</span>
+          <span className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white/[0.02]">config/fundamental-scoring.json</span>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
           {Object.entries(workspace.fundamentals.scoringMethod.weights).map(([key, weight]) => (
-            <div key={key} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-slate-500">{key}</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{Math.round(weight * 100)}%</p>
+            <div key={key} className="surface-muted p-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 truncate">{key}</p>
+              <p className="mt-1.5 font-number text-xl font-bold text-white">{Math.round(weight * 100)}%</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="surface overflow-hidden">
-        <div className="border-b border-white/10 px-5 py-4">
-          <h2 className="text-base font-semibold text-white">{t.fundamentals.tableTitle}</h2>
-          <p className="mt-1 text-sm text-slate-500">{t.fundamentals.tableBody}</p>
+      <section className="surface overflow-hidden shadow-2xl">
+        <div className="border-b border-white/[0.08] bg-white/[0.02] px-5 py-3">
+          <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-white">{t.fundamentals.tableTitle}</h2>
+          <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t.fundamentals.tableBody}</p>
         </div>
         <div className="overflow-x-auto">
-          <table className="terminal-table w-full min-w-[1200px] text-left text-sm">
+          <table className="terminal-table w-full min-w-[1200px] text-left">
             <thead>
               <tr>
-                <th>{t.fundamentals.stock}</th>
-                <th>{t.fundamentals.qualityScore}</th>
-                <th>{t.fundamentals.momentumScore}</th>
-                <th>{t.fundamentals.revenueGrowth}</th>
-                <th>{t.fundamentals.netProfitGrowth}</th>
-                <th>ROE</th>
-                <th>{t.fundamentals.grossMargin}</th>
-                <th>{t.fundamentals.debtRatio}</th>
-                <th>{t.fundamentals.operatingCashFlow}</th>
-                <th>{t.fundamentals.dividendYield}</th>
+                <th className="w-[180px]">{t.fundamentals.stock}</th>
+                <th className="text-right">{t.fundamentals.qualityScore}</th>
+                <th className="text-right">{t.fundamentals.momentumScore}</th>
+                <th className="text-right">{t.fundamentals.revenueGrowth}</th>
+                <th className="text-right">{t.fundamentals.netProfitGrowth}</th>
+                <th className="text-right">ROE</th>
+                <th className="text-right">{t.fundamentals.grossMargin}</th>
+                <th className="text-right">{t.fundamentals.debtRatio}</th>
+                <th className="text-right">{t.fundamentals.operatingCashFlow}</th>
+                <th className="text-right">{t.fundamentals.dividendYield}</th>
               </tr>
             </thead>
             <tbody>
               {topStocks.map((stock) => (
-                <tr key={stock.symbol}>
+                <tr key={stock.symbol} className="group">
                   <td>
-                    <div className="font-medium text-white">{stock.name}</div>
-                    <div className="mt-1 text-xs text-slate-500">{stock.symbol} · {stock.sector}</div>
+                    <div className="!font-sans font-bold text-white group-hover:text-cyan">{stock.name}</div>
+                    <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-400">{stock.symbol} · {stock.sector}</div>
                   </td>
-                  <td>{formatScore(stock.qualityScore ?? 0)}</td>
-                  <td>{formatScore(stock.momentumScore ?? 0)}</td>
-                  <td>{formatRatioPercent(stock.fundamentals.revenueGrowth)}</td>
-                  <td>{formatRatioPercent(stock.fundamentals.netProfitGrowth)}</td>
-                  <td>{formatRatioPercent(stock.fundamentals.roe)}</td>
-                  <td>{formatRatioPercent(stock.fundamentals.grossMargin)}</td>
-                  <td>{formatRatioPercent(stock.fundamentals.debtRatio)}</td>
-                  <td>{formatLargeNumber(stock.fundamentals.operatingCashFlow)}</td>
-                  <td>{formatRatioPercent(stock.fundamentals.dividendYield)}</td>
+                  <td className="text-right font-bold text-mint">{formatScore(stock.qualityScore ?? 0)}</td>
+                  <td className="text-right font-bold text-amber">{formatScore(stock.momentumScore ?? 0)}</td>
+                  <td className="text-right">{formatRatioPercent(stock.fundamentals.revenueGrowth)}</td>
+                  <td className="text-right">{formatRatioPercent(stock.fundamentals.netProfitGrowth)}</td>
+                  <td className="text-right">{formatRatioPercent(stock.fundamentals.roe)}</td>
+                  <td className="text-right">{formatRatioPercent(stock.fundamentals.grossMargin)}</td>
+                  <td className="text-right">{formatRatioPercent(stock.fundamentals.debtRatio)}</td>
+                  <td className="text-right">{formatLargeNumber(stock.fundamentals.operatingCashFlow)}</td>
+                  <td className="text-right font-bold text-mint">{formatRatioPercent(stock.fundamentals.dividendYield)}</td>
                 </tr>
               ))}
             </tbody>

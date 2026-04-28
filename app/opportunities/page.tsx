@@ -1,4 +1,5 @@
-import { Bot, Radar, Search, SlidersHorizontal, Sparkles, Target } from "lucide-react";
+import { Bot, Radar, Search, SlidersHorizontal, Sparkles, Target, ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   OpportunityCard,
   opportunityAssetLabel,
@@ -275,40 +276,50 @@ export default async function OpportunitiesPage({
         </div>
       </section>
 
-      <section className="surface overflow-hidden">
-        <div className="border-b border-white/10 px-5 py-4">
-          <h2 className="text-base font-semibold text-white">机会对比表</h2>
-          <p className="mt-1 text-sm text-slate-500">同一批筛选结果的密集对比视图。</p>
+      <section className="surface overflow-hidden shadow-2xl">
+        <div className="border-b border-white/[0.08] bg-white/[0.02] px-5 py-3">
+          <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-white">机会密集对比表</h2>
+          <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">同一批筛选结果的结构化对比视图。</p>
         </div>
         <div className="overflow-x-auto">
-          <table className="terminal-table w-full min-w-[1320px] text-left text-sm">
+          <table className="terminal-table w-full min-w-[1320px] text-left">
             <thead>
               <tr>
-                <th>名称</th>
+                <th className="w-[180px]">名称</th>
                 <th>类型</th>
-                <th>风险</th>
-                <th>防御分</th>
-                <th>长线分</th>
-                <th>短线分</th>
-                <th>市场强度</th>
-                <th>基本面质量</th>
-                <th>主驱动</th>
-                <th>失效条件</th>
+                <th className="text-center">风险等级</th>
+                <th className="text-right">防御分</th>
+                <th className="text-right">长线分</th>
+                <th className="text-right">短线分</th>
+                <th className="text-right">市场强度</th>
+                <th className="text-right">基本面质量</th>
+                <th className="text-center">主驱动力</th>
+                <th className="pl-8">主要失效条件</th>
               </tr>
             </thead>
             <tbody>
               {opportunities.slice(0, 24).map((item) => (
-                <tr key={item.id}>
-                  <td className="font-medium text-white">{item.title}</td>
-                  <td>{opportunityAssetLabel(item.assetType)}</td>
-                  <td>{opportunityRiskLabel(item.riskLevel)}</td>
-                  <td>{item.scoreBreakdown.defensiveness.toFixed(1)}</td>
-                  <td>{item.scoreBreakdown.longTerm.toFixed(1)}</td>
-                  <td>{item.scoreBreakdown.shortTerm.toFixed(1)}</td>
-                  <td>{item.scoreBreakdown.marketStrength.toFixed(1)}</td>
-                  <td>{item.scoreBreakdown.fundamentalQuality.toFixed(1)}</td>
-                  <td>{opportunityDriverLabel(item.driver)}</td>
-                  <td>{item.thesisInvalidation[0]}</td>
+                <tr key={item.id} className="group">
+                  <td className="!font-sans font-bold text-white group-hover:text-cyan">{item.title}</td>
+                  <td className="!font-sans">{opportunityAssetLabel(item.assetType)}</td>
+                  <td className="text-center">
+                    <span className={cn("inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider", 
+                      item.riskLevel === "low" ? "text-mint border border-mint/20 bg-mint/5" :
+                      item.riskLevel === "medium" ? "text-amber border border-amber/20 bg-amber/5" :
+                      "text-rose border border-rose/20 bg-rose/5"
+                    )}>
+                      {opportunityRiskLabel(item.riskLevel)}
+                    </span>
+                  </td>
+                  <td className="text-right">{item.scoreBreakdown.defensiveness.toFixed(1)}</td>
+                  <td className="text-right font-bold text-mint">{item.scoreBreakdown.longTerm.toFixed(1)}</td>
+                  <td className="text-right font-bold text-amber">{item.scoreBreakdown.shortTerm.toFixed(1)}</td>
+                  <td className="text-right">{item.scoreBreakdown.marketStrength.toFixed(1)}</td>
+                  <td className="text-right">{item.scoreBreakdown.fundamentalQuality.toFixed(1)}</td>
+                  <td className="text-center !font-sans">{opportunityDriverLabel(item.driver)}</td>
+                  <td className="!font-sans pl-8 text-xs text-slate-400 group-hover:text-slate-300 truncate max-w-[200px]">
+                    {item.thesisInvalidation[0]}
+                  </td>
                 </tr>
               ))}
             </tbody>
