@@ -165,6 +165,73 @@ Opportunity Lab shows:
 
 This makes it clear whether a research conclusion is powered by live providers or fallback data.
 
+## Nightly Research Reports
+
+Run the overnight research workflow:
+
+```powershell
+cd C:\quantize
+npm run research:nightly
+```
+
+The runner writes timestamped files to `reports/` and updates these latest pointers:
+
+- `reports/latest.json`
+- `reports/latest.md`
+- `reports/latest-report.json` for backward compatibility
+- `reports/latest-report.md` for backward compatibility
+
+Open the app page:
+
+```txt
+http://127.0.0.1:3001/reports
+```
+
+If no report exists, the page shows an empty state with the command to run.
+
+### Nightly With Akshare
+
+Start the local bridge first:
+
+```powershell
+cd C:\quantize\data-service
+.\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
+```
+
+If Windows refuses port `8000`, use a high port such as `18080`:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 18080
+```
+
+Then run the nightly job with Akshare:
+
+```powershell
+cd C:\quantize
+$env:DATA_PROVIDER="akshare"
+$env:AKSHARE_API_URL="http://127.0.0.1:8000"
+$env:NIGHTLY_RESEARCH_TIMEOUT_MS="90000"
+npm run research:nightly
+```
+
+Use `http://127.0.0.1:18080` instead if you started the bridge on `18080`.
+
+The runner logs:
+
+- selected provider
+- bridge URL
+- whether fallback happened
+- active provider
+- number of symbols loaded
+
+To verify whether the report used real or mock data, check either:
+
+- console output: `Fallback happened` and `Real symbols loaded`
+- `reports/latest.json -> metadata.providerMode`
+- `/reports` page data status card
+
+If the bridge fails, times out, or returns invalid data, the runner falls back to mock data and still writes a report. No Supabase, paid API, or paid server is required.
+
 ## Vercel And Localhost
 
 Vercel cannot access your computer's `localhost` or `127.0.0.1`.

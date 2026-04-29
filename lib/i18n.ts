@@ -8,6 +8,7 @@ const dictionaries = {
     nav: {
       market: "Market Leadership",
       strategies: "Strategies",
+      reports: "Daily Report",
       opportunities: "Opportunity Lab",
       themes: "Theme Research",
       fundamentals: "Fundamentals",
@@ -162,6 +163,7 @@ const dictionaries = {
     nav: {
       market: "市场主线",
       strategies: "策略库",
+      reports: "研究日报",
       opportunities: "机会分析",
       themes: "主题研究",
       fundamentals: "基本面看板",

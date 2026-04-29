@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BarChart3, BookMarked, FolderKanban, PieChart, Sigma, Sparkles, Zap } from "lucide-react";
+import { BarChart3, BookMarked, FileText, FolderKanban, PieChart, Sigma, Sparkles, Zap } from "lucide-react";
 import "./globals.css";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NavLink } from "@/components/nav-link";
@@ -30,6 +30,7 @@ async function AsyncRootLayout({
   const navItems = [
     { href: "/", label: t.nav.market, icon: BarChart3 },
     { href: "/strategies", label: t.nav.strategies, icon: Zap },
+    { href: "/reports", label: t.nav.reports, icon: FileText },
     { href: "/opportunities", label: t.nav.opportunities, icon: Sparkles },
     { href: "/themes", label: t.nav.themes, icon: FolderKanban },
     { href: "/fundamentals", label: t.nav.fundamentals, icon: Sigma },
