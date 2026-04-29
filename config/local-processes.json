@@ -1,0 +1,45 @@
+{
+  "processes": [
+    {
+      "id": "quantize-web",
+      "name": "Quantize Web",
+      "kind": "external",
+      "description": "Next.js A-share research workspace served by the local launcher.",
+      "healthUrl": "http://127.0.0.1:3001",
+      "port": 3001,
+      "cwd": ".",
+      "command": "npm.cmd",
+      "args": ["run", "dev", "--", "-p", "3001"],
+      "managed": false
+    },
+    {
+      "id": "akshare-bridge",
+      "name": "Akshare Bridge",
+      "kind": "service",
+      "description": "Local Python bridge for A-share market snapshots. Uses configured theme universe only.",
+      "healthUrl": "http://127.0.0.1:18080/health",
+      "port": 18080,
+      "cwd": "data-service",
+      "command": "python",
+      "windowsCommand": ".venv\\Scripts\\python.exe",
+      "args": ["app.py"],
+      "env": {
+        "DATA_SERVICE_HOST": "127.0.0.1",
+        "DATA_SERVICE_PORT": "18080",
+        "AKSHARE_MAX_SYMBOLS": "30",
+        "AKSHARE_SNAPSHOT_TIMEOUT_SECONDS": "75"
+      },
+      "managed": true
+    },
+    {
+      "id": "nightly-research",
+      "name": "Nightly Research",
+      "kind": "job",
+      "description": "One-shot research report runner that writes reports/latest.json and reports/latest.md.",
+      "cwd": ".",
+      "command": "npm.cmd",
+      "args": ["run", "research:nightly"],
+      "managed": true
+    }
+  ]
+}

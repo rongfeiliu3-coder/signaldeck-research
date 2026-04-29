@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BarChart3, BookMarked, FileText, FolderKanban, PieChart, Sigma, Sparkles, Zap } from "lucide-react";
+import { Activity, BarChart3, BookMarked, FileText, FolderKanban, PieChart, Sigma, Sparkles, Zap } from "lucide-react";
 import "./globals.css";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NavLink } from "@/components/nav-link";
@@ -34,7 +34,8 @@ async function AsyncRootLayout({
     { href: "/opportunities", label: t.nav.opportunities, icon: Sparkles },
     { href: "/themes", label: t.nav.themes, icon: FolderKanban },
     { href: "/fundamentals", label: t.nav.fundamentals, icon: Sigma },
-    { href: "/funds", label: t.nav.funds, icon: PieChart }
+    { href: "/funds", label: t.nav.funds, icon: PieChart },
+    { href: "/monitor", label: locale === "zh" ? "运行监控" : "Local Monitor", icon: Activity }
   ];
 
   return (

@@ -60,6 +60,39 @@ DEEPSEEK_MODEL=deepseek-chat
 
 Never commit `.env.local`. Never prefix server secrets with `NEXT_PUBLIC_`.
 
+## Local Desktop Launcher And Monitor
+
+This project now includes a local-first graphical run monitor for personal use.
+
+Create the Windows desktop shortcut:
+
+```powershell
+cd C:\quantize
+powershell -ExecutionPolicy Bypass -File .\scripts\create-desktop-shortcut.ps1
+```
+
+Then double-click `Quantize A股研究工作台` on the Desktop. The launcher starts the local Next.js app on port `3001` if it is not already running, then opens:
+
+```txt
+http://127.0.0.1:3001/monitor
+```
+
+The monitor page can:
+
+- show whether the Quantize web app, Akshare bridge, and nightly research runner are running
+- start, stop, or restart the Akshare bridge
+- run the nightly research job on demand
+- show recent local logs from `runtime/logs/`
+
+Safety rules:
+
+- The monitor only controls services listed in `config/local-processes.json`.
+- It does not allow arbitrary command input from the browser.
+- Runtime logs are ignored by git through `runtime/`.
+- API keys stay in `.env.local` or deployment environment variables and must never be committed.
+
+The first version is intentionally a local web control console. It is structured so an Electron desktop shell can wrap it later without rewriting the research workspace.
+
 ## Vercel Environment Variables
 
 In Vercel, open:
