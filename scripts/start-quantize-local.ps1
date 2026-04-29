@@ -12,8 +12,11 @@ function Test-PortOpen {
 
 Set-Location $ProjectRoot
 
-if (-not (Test-PortOpen -TargetPort $Port)) {
+$alreadyRunning = Test-PortOpen -TargetPort $Port
+
+if (-not $alreadyRunning) {
   Start-Process -FilePath "npm.cmd" -ArgumentList @("run", "dev", "--", "-p", "$Port") -WorkingDirectory $ProjectRoot -WindowStyle Hidden
+  Start-Process $Url
 }
 
 $deadline = (Get-Date).AddSeconds(45)
