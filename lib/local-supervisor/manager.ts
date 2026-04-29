@@ -12,6 +12,11 @@ type ManagedRuntime = {
   lastExitCode?: number | null;
 };
 
+type SpawnConfig = {
+  command: string;
+  args: string[];
+};
+
 const runtimeRoot = path.join(process.cwd(), "runtime");
 const logRoot = path.join(runtimeRoot, "logs");
 const secretPatterns = [/DEEPSEEK_API_KEY=[^\s]+/gi, /TUSHARE_TOKEN=[^\s]+/gi, /AKSHARE_API_URL=[^\s]+/gi];
@@ -54,6 +59,22 @@ function resolveCommand(config: LocalProcessConfig) {
     }
   }
   return config.command;
+}
+
+function resolveSpawnConfig(config: LocalProcessConfig): SpawnConfig {
+  const command = resolveCommand(config);
+
+  if (process.platform === "win32" && command.toLowerCase().endsWith(".cmd")) {
+    return {
+      command: "cmd.exe",
+      args: ["/d", "/s", "/c", command, ...config.args]
+    };
+  }
+
+  return {
+    command,
+    args: config.args
+  };
 }
 
 function runPowerShell(command: string): Promise<string> {
@@ -99,13 +120,13 @@ async function checkHealth(url?: string): Promise<Pick<LocalProcessStatus, "heal
     return {
       healthOk: response.ok,
       healthLatencyMs: Date.now() - startedAt,
-      healthMessage: response.ok ? "健康检查正常" : `HTTP ${response.status}`
+      healthMessage: response.ok ? "Health check OK" : `HTTP ${response.status}`
     };
   } catch (error) {
     return {
       healthOk: false,
       healthLatencyMs: Date.now() - startedAt,
-      healthMessage: error instanceof Error ? error.message : "健康检查失败"
+      healthMessage: error instanceof Error ? error.message : "Health check failed"
     };
   } finally {
     clearTimeout(timeout);
@@ -171,11 +192,11 @@ export async function startLocalProcess(id: string) {
     return current;
   }
 
-  const command = resolveCommand(config);
+  const spawnConfig = resolveSpawnConfig(config);
   const cwd = resolveCwd(config);
-  appendLog(config.id, `\n[${new Date().toISOString()}] Starting ${config.name}: ${command} ${config.args.join(" ")}\n`);
+  appendLog(config.id, `\n[${new Date().toISOString()}] Starting ${config.name}: ${spawnConfig.command} ${spawnConfig.args.join(" ")}\n`);
 
-  const child = spawn(command, config.args, {
+  const child = spawn(spawnConfig.command, spawnConfig.args, {
     cwd,
     env: {
       ...process.env,
@@ -194,6 +215,12 @@ export async function startLocalProcess(id: string) {
 
   child.stdout.on("data", (chunk) => appendLog(config.id, chunk.toString()));
   child.stderr.on("data", (chunk) => appendLog(config.id, chunk.toString()));
+  child.on("error", (error) => {
+    runtime.status = "stopped";
+    runtime.stoppedAt = Date.now();
+    runtime.lastExitCode = 1;
+    appendLog(config.id, `[${new Date().toISOString()}] Failed to start: ${error.message}\n`);
+  });
   child.on("spawn", () => {
     runtime.status = "running";
     appendLog(config.id, `[${new Date().toISOString()}] Started with PID ${child.pid}\n`);
